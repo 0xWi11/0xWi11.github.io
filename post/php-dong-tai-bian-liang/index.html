@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>php动态变量 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="什么叫动态变量
+将一个变量的内容作为另一个变量的名称，在php中这个需求可以通过可变变量（Variable variables）来实现。
+就是说，一个变量的变量名可以动态的设置和使用。一个普通的变量通过声明来设置，例如：
+&lt;?php
+..." />
+    <meta name="keywords" content="代码审计" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">php动态变量</h2>
+            <div class="post-date">2019-02-22</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="什么叫动态变量">什么叫动态变量</h2>
+<p>将一个变量的内容作为另一个变量的名称，在php中这个需求可以通过可变变量（Variable variables）来实现。</p>
+<p>就是说，一个变量的变量名可以动态的设置和使用。一个普通的变量通过声明来设置，例如：</p>
+<pre><code class="language-php">&lt;?php
+$a = 'hello';
+?&gt;
+</code></pre>
+<p>一个可变变量获取了一个普通变量的值作为这个可变变量的变量名。在上面的例子中 hello 使用了两个美元符号（$）以后，就可以作为一个可变变量的变量了。例如：</p>
+<pre><code class="language-php">&lt;?php
+$$a = 'world';
+?&gt;
+</code></pre>
+<p>这时，两个变量都被定义了：$a 的内容是“hello”并且 $hello 的内容是“world”。因此，以下语句：</p>
+<pre><code class="language-php">&lt;?php
+echo &quot;$a ${$a}&quot;;
+?&gt;
+</code></pre>
+<p>与以下语句输出完全相同的结果：</p>
+<pre><code class="language-php">&lt;?php
+echo &quot;$a $hello&quot;;
+?&gt;
+</code></pre>
+<p>它们都会输出：hello world。</p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/XSg-eSjSDb/" class="tag">
+                    代码审计
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/wpscan-wordpress-wang-zhan-lou-dong-sao-miao-qi/">
+                  <h3 class="post-title">
+                    WPScan——Wordpress网站漏洞扫描器
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

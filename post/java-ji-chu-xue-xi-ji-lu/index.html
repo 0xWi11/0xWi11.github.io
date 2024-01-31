@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Java基础学习记录 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="MVC框架
+
+javaEE基础知识
+MVC的工作流程就是Controller接受用户的请求，然后决定哪个Model来处理，最后数据处理的结果通过View来返回给用户。
+
+Servlet
+Servlet其实是运行在Web容器中的小程序，在以前..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Java基础学习记录</h2>
+            <div class="post-date">2020-04-10</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="mvc框架">MVC框架</h2>
+<figure data-type="image" tabindex="1"><img src="https://0xwi11.github.io/post-images/1678674471500.png" alt="" loading="lazy"></figure>
+<h2 id="javaee基础知识">javaEE基础知识</h2>
+<p>MVC的工作流程就是Controller接受用户的请求，然后决定哪个Model来处理，最后数据处理的结果通过View来返回给用户。<br>
+<img src="https://0xwi11.github.io/post-images/1678674504518.png" alt="" loading="lazy"></p>
+<h2 id="servlet">Servlet</h2>
+<p>Servlet其实是运行在Web容器中的小程序，在以前的的版本servlet的配置要在web.xml中进行，3.0以后的版本可以通过注解来修改Servlet的属性。属性有name、urlPatterns、loadOnStartup等等<br>
+<img src="https://0xwi11.github.io/post-images/1678674530084.png" alt="" loading="lazy"><br>
+Servlet的访问流程，首先是服务器通过对mapping的匹配找到servlet的name，然后通过name找到servlet的class文件去执行。<br>
+<img src="https://0xwi11.github.io/post-images/1678674545485.png" alt="" loading="lazy"><br>
+Servlet，有对应HTTP的接口（GET、POST、DELETE、OPTIONS、HEAD、PUT、TRACE）CONNECT<br>
+<strong>init()接口</strong><br>
+在servlet实例化之后会自动调用<br>
+<strong>service()接口</strong><br>
+用来执行任务的主要方法，需在init()方法调用后调用，每次服务器端接收到一个请求就会创建一个新的进程并调用服务。<br>
+<strong>doGet()/doPost()方法</strong><br>
+根据不同的HTTP请求方式会动用不同的方法<br>
+<strong>destory()方法</strong><br>
+当Servlet容器检测到一个Servlet对象应该从服务中被移除时就会调用destory方法。<br>
+<strong>getServletConfig</strong>方法返回一些初始化参数<br>
+<strong>getSerletInfo</strong>返回一些作者版本等信息。<br>
+<img src="https://0xwi11.github.io/post-images/1678674567604.png" alt="" loading="lazy"></p>
+<h2 id="servlet的生命周期">Servlet的生命周期</h2>
+<p>首先用户发送一个请求，然后容器（比如说tomcat）就回去找到对应的servlet，如果有对应的servlet那么服务器就会创建一个新的进程去创建Servlet实例调用init方法调用service方法然后返回数据。</p>
+<h2 id="filter">filter</h2>
+<p>filter的配置也类似于servlet，可以使用web.xml也可以在高版本下使用注解，但是比较推荐使用web.xml<br>
+注解的参数有urlPatterns/value，initParams<br>
+<img src="https://0xwi11.github.io/post-images/1678674635780.png" alt="" loading="lazy"><br>
+概述就是<br>
+服务器根据应用程序配置文件设置的过滤规则进行检查，若客户请求满足过滤条件，则对请求/响应进行拦截，可以选择传递给资源处理器也可以选择直接返回请求，传给资源处理器的话响应的信息将逐级返回。</p>
+<h2 id="生命周期">生命周期</h2>
+<p>1、在应用启动的时候就进行装载Filter类而servlet是在请求时才创建，根据配置文件中的每个过滤器，只创建一个实例<br>
+2、容器创建好Filter实例之后，调用init方法。随后被Web容器保存等待用户请求资源。<br>
+3、当用户访问的资源正好被Filter的url-pattern拦截时，容器会取出filter类调用dofilter方法，下次需要拦截的时候直接取出实例调用方法（单例多线程）<br>
+4、当应用被停止了或者重新装载了，则会执行Filter的destory方法，Filter对象销毁。</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/prototype-pollution-yuan-xing-wu-ran-bi-ji/">
+                  <h3 class="post-title">
+                    Prototype pollution原型污染笔记
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

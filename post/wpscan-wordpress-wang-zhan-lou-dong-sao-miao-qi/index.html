@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>WPScan——Wordpress网站漏洞扫描器 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="介绍
+WPScan是Kali Linux默认自带的一款漏洞扫描工具，它采用Ruby编写，能够扫描WordPress网站中的多种安全漏洞，其中包括主题漏洞、插件漏洞和WordPress本身的漏洞。最新版本WPScan的数据库中包含超过1800..." />
+    <meta name="keywords" content="信息安全" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">WPScan——Wordpress网站漏洞扫描器</h2>
+            <div class="post-date">2019-02-18</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="介绍">介绍</h2>
+<p>WPScan是Kali Linux默认自带的一款漏洞扫描工具，它采用Ruby编写，能够扫描WordPress网站中的多种安全漏洞，其中包括主题漏洞、插件漏洞和WordPress本身的漏洞。最新版本WPScan的数据库中包含超过18000种插件漏洞和2600种主题漏洞，并且支持最新版本的WordPress。值得注意的是，它不仅能够扫描类似robots.txt这样的敏感文件，而且还能够检测当前已启用的插件和其他功能。<br>
+Github项目地址：<br>
+https://github.com/wpscanteam/wpscan.git</p>
+<h2 id="wpscan更新">WPScan更新</h2>
+<pre><code>wpscan --update
+</code></pre>
+<h2 id="wpscan使用参数">WPScan使用参数</h2>
+<pre><code>配置文件名称： example.conf.json
+--update							更新数据库到最新版本
+--url		 | -u &lt;target url&gt;		要扫描的WordPress URL/domain
+--force 	 | -f					当目标正在运行时强制不检查
+--enumerate  | -e [option(s)] 		枚举
+参数：
+	u 			用户id从1到10
+	u[10-20] 	用户id从10到20
+	p 			插件
+	vp 			只用含有漏洞的插件
+	ap			全部插件（时间会很长）
+	tt			timthumbs
+	t			主题
+	at			全部主题（时间会很长）
+	如果没有提供参数的话，默认为&quot;vt,tt,u,vp&quot;
+</code></pre>
+<pre><code>--wordlist | -w &lt;wordlist&gt; 		暴力破解密码字典
+--username | -U &lt;username&gt;		暴力破解用户名
+--usernames 	&lt;path-to-file&gt;  暴力破解用户名字典
+--threads   | -t &lt;number of threads&gt; 多线程请求时的线程数
+</code></pre>
+<h2 id="常用命令">常用命令</h2>
+<h3 id="探测基本信息">探测基本信息</h3>
+<pre><code>wpscan--urlwww.xxx.com
+</code></pre>
+<h3 id="全面检测">全面检测</h3>
+<pre><code>wpscan--urlwww.xxx.com-e
+</code></pre>
+<h3 id="扫描插件">扫描插件</h3>
+<pre><code>wpscan--urlwwww.xxx.com-enumeratep
+</code></pre>
+<h4 id="只扫描易受到攻击的插件">只扫描易受到攻击的插件</h4>
+<pre><code>wpscan--urlwwww.xxx.com-enumeratevp
+</code></pre>
+<h4 id="扫描所有插件">扫描所有插件</h4>
+<pre><code>wpscan--urlwwww.xxx.com-enumerateap
+</code></pre>
+<h3 id="猜测用户">猜测用户</h3>
+<pre><code>wpscan--urlwww.xx.com-eu或者
+
+wpscan--urlwww.xxx.com-enumerateu
+</code></pre>
+<h3 id="爆破admin用户密码">爆破admin用户密码</h3>
+<pre><code>wpscan--urlwww.xxx.com--字典.txt--useruanmeadmin
+
+多线程
+
+wpscan--urlwww.xxx.com--字典.txt--useruanmeadmin--threads30
+</code></pre>
+<h3 id="代理">代理</h3>
+<pre><code>wpscan--urlwww.xxx.com-proxy127.0.0.1:8080
+
+用代理可以在结合burpsuit来抓取wpscan的扫描信息等。
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/amUzoEOq9/" class="tag">
+                    信息安全
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/nmap-duan-kou-sao-miao/">
+                  <h3 class="post-title">
+                    Nmap——端口扫描
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

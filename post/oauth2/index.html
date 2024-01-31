@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>OAuth2.0漏洞介绍和挖洞案例 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="
+小时候，网上冲浪总会遇到一些网站可以使用用QQ账号登陆，因为之前有被网上的人骗过的经历，于是对自己的QQ账号密码还是有安全防护意识的，每当看到外表很简陋的网站有“用QQ账号登陆”的功能时，总是不敢输入自己的账号密码，怕当前的网站把账号密码..." />
+    <meta name="keywords" content="信息安全" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">OAuth2.0漏洞介绍和挖洞案例</h2>
+            <div class="post-date">2021-02-02</div>
+            
+            <div class="post-content" v-pre>
+              <p><img src="https://0xwi11.github.io/post-images/1645431607813.png" alt="" loading="lazy"><br>
+小时候，网上冲浪总会遇到一些网站可以使用<code>用QQ账号登陆</code>，因为之前有被网上的人骗过的经历，于是对自己的QQ账号密码还是有安全防护意识的，每当看到外表很简陋的网站有“用QQ账号登陆”的功能时，总是不敢输入自己的账号密码，怕当前的网站把账号密码泄露给黑客。然而事实上并不需要担心，因为账号密码的验证是在QQ的认证服务器上面进行的。如果说当前网站不安全，也就只能够泄露你在授权时授予权限的信息。<br>
+<img src="https://0xwi11.github.io/post-images/1645431656357.png" alt="" loading="lazy"></p>
+<p>那么，这个<code>使用QQ账号登陆</code>是如何实现的呢？这个功能一般都是使用 OAuth 2.0 协议框架构建的。<br>
+OAuth2.0对于挖洞的白帽子来说应该是要放在Checklist中的的功能点了（起码对我来说是的），因为OAuth2.0的错误配置，可以导致很多的漏洞，而且一般都是跟认证绕过有关。<br>
+在本文中，我会列出OAuth2.0比较常见的漏洞以及我实际挖洞过程中遇到的漏洞。</p>
+<h2 id="oauth是什么"><strong>OAuth是什么？</strong></h2>
+<p>OAuth 是一种常用的授权框架，它使网站和 Web 应用程序能够请求对另一个应用程序上的用户帐户的有限访问。OAuth 允许用户授予此访问权限，而无需将其登录凭据暴露给请求的应用程序。所以用户可以选择共享他们想要共享的数据，而不必将其帐户的完全控制权交给第三方。所以说你的账号密码并不是提交给了第三方，只是将部分数据的访问权限交给了第三方，比如说邮箱、性别。</p>
+<p>OAuth设计是可以让第三方来访问用户的某些特定的数据，例如，应用程序可能使用 OAuth 请求访问您的电子邮件联系人列表，以便它可以建议人们进行联系。然而，同样的机制也被用于提供第三方认证服务，允许用户使用他们在不同网站使用同一账户登录（比如，使用qq、微博、微信登陆）。</p>
+<p>OAuth 2.0的rfc定义了几种场景授权模式。<br>
+以下是来自乌云上的一篇<a href="https://wooyun.js.org/drops/OAuth%202.0%E5%AE%89%E5%85%A8%E6%A1%88%E4%BE%8B%E5%9B%9E%E9%A1%BE.html">文章</a>的解释</p>
+<p><strong>（A）Authorization Code Grant（授权code许可）</strong><br>
+用户在平台方授权页面登录后，跳转的redirect_uri中，参数段（如http://cakkback_url/?code=aaaaa&amp;state=ssss）带code参数；此时应用需要再次向平台方的指定接口（一般为获取Access Token接口）发起请求，用code参数换取access token。</p>
+<p>这是OAuth 1.0中几乎唯一定义过的业务场景，主要用于传统客户端和有服务器参与的网站授权。<br>
+<img src="https://0xwi11.github.io/post-images/1645429663175.png" alt="" loading="lazy"><br>
+图：rfc6749 第4.1节Authorization Code Grant流程图</p>
+<p><strong>（B）Implicit Grant（隐式许可）</strong><br>
+用户在平台方授权页面登录后，跳转的redirect_uri中，uri片段（如http://cakkback_url/#access_token=aaaaaa&amp;uid=aaaaa）直接带access token。</p>
+<p>这种场景不验证应用的有效性，主要用于无应用方服务器参与的纯浏览器javascript/HTML5交互。<br>
+<img src="https://0xwi11.github.io/post-images/1645429701181.png" alt="" loading="lazy"><br>
+图：rfc6749 第4.2节Implicit Grant流程图</p>
+<h2 id="oauth身份验证漏洞是如何产生的"><strong>OAuth身份验证漏洞是如何产生的？</strong></h2>
+<p>OAuth的主要问题就是，安全性几乎完全依赖开发人员，需要使用正确的配置选项，不同的授权模式会产生不同的安全漏洞，如果说开发的安全意识不高，非常有可能会出现漏洞。</p>
+<p>如何知道网站是否使用了OAuth呢？<br>
+如果说网站有“使用XX登录”这类功能，说明很有可能就是在使用OAuth。</p>
+<p><strong>本文主要介绍两种比较常见通用而且危害比较大的漏洞。</strong></p>
+<h2 id="csrf绑定账号"><strong>CSRF绑定账号</strong></h2>
+<p><img src="https://0xwi11.github.io/post-images/1645430101921.jpg" alt="" loading="lazy"><br>
+在OAuth2.0的授权code模式下，在第6步中，认证服务器会返回一个code，此code的作用是让网站类应用使用此code取认证服务器进行授权认证的操作，如果认证成功则能够证明用户的身份。所以说如果让攻击者获取到了code，那么攻击者就可以冒充受害者使用网站应用，或者换另外一个思路，让受害者冒充攻击者以完成受害者账号被迫绑定攻击者手机号</p>
+<p>理想情况下，此流程应该使用一个state参数来防止CSRF攻击，该state参数应包含一个不可猜测的值，例如在用户首次启动 OAuth 流时与用户会话相关联的内容的哈希值。然后，此值在客户端应用程序和 OAuth 服务之间来回传递，作为客户端应用程序的CSRF 令牌形式。如果说你们没有发现网站使用state或者类似的参数，则也很有可能存在漏洞，可以欺骗用户浏览器完成之前自己启动 OAuth 流程，类似于传统的CSRF 攻击。这可能会产生严重后果，具体取决于客户端应用程序使用 OAuth 的方式。</p>
+<p>比如说在A网站上你可以通过修改个人信息来绑定B网站来使用B网站的一键登录功能。在这种情况下，如果A网站未能使用该state参数，攻击者可能发送一个恶意的链接，受害者点击之后会将攻击者的B网站账号绑定到受害者的A网站账号上，此时攻击者可以通过A网站上的一键登录功能，输入攻击者B网站账号来登录受害者A网站的账号。</p>
+<p><strong>案例：</strong><br>
+<img src="https://0xwi11.github.io/post-images/1645430456910.png" alt="" loading="lazy"><br>
+如图攻击者发起对应用的授权，将会把攻击者的slack应用的权限授予给被打码的APP，会导致的结果就是APP中的所有记录都会被发送至攻击者的slack应用。</p>
+<p><img src="https://0xwi11.github.io/post-images/1645430447582.png" alt="" loading="lazy"><br>
+可以看到默认情况下state参数为空，这意味着应用没有对state参数进行校验。<br>
+所以在这个情况下的攻击场景：<br>
+1、攻击者发送上图的链接给受害者。<br>
+2、受害者点击链接。<br>
+3、受害者在APP中的记录发送到攻击者的slack中。</p>
+<h2 id="重定向漏洞"><strong>重定向漏洞</strong></h2>
+<p><img src="https://0xwi11.github.io/post-images/1645430791370.jpg" alt="" loading="lazy"><br>
+在隐式许可的第6步中，认证接口会返回一个access token，此token可以用来向平台方（认证服务器）去请求用户的特定数据（邮箱、性别等），同时此token也是应用方用来对用户进行认证的令牌，也就是说有了此令牌就可以冒充受害者。<br>
+有什么方法可以窃取这个token呢？<br>
+有一个方法是通过重定向漏洞，如果说平台方的redirec_url存在重定向漏洞，或者说应用方在平台方配置时的错误允许重定向到任意URL，都会导致攻击者可以强迫受害者启动OAuth流程，然后将access_token泄露到攻击者的服务器。</p>
+<p><strong>案例：</strong><br>
+攻击发生在登录页面，当用户点击“使用XX登录”时，会发送如下请求：<br>
+<img src="https://0xwi11.github.io/post-images/1645431118833.png" alt="" loading="lazy"><br>
+这个请求的作用就是，向平台方（认证服务器）表明自己的身份，并且要求带上access_token并返回到redirect_url，漏洞在于，这里的redirect_url完全没有进行任何验证，所以说我们可以指定其为攻击者的服务器。攻击者需要做的就是将上图的URL发送给受害者点击，如果说受害者在最近在授权服务器认证过，那么恶意链接将会把access_token带回给攻击者，攻击者获取access_token之后可以冒充受害者登录应用网站。<br>
+<img src="https://0xwi11.github.io/post-images/1645431399569.png" alt="" loading="lazy"><br>
+使用此token可以登录应用网站。</p>
+<p>对开发来说使用白名单是解决这个问题的最好的方式。但是，可能仍然有绕过此验证的方法。<br>
+这里演示一个允许任意子域名白名单的绕过方式<br>
+正常请求：<br>
+http://example.com/socialize.login?client_id=123456&amp;redirect_uri=http://victim.com/&amp;x_provider=facebook&amp;response_type=token<br>
+恶意请求：<br>
+http://example.com/socialize.login?client_id=123456&amp;redirect_uri=<strong>http://attacker.com%23.victim.com/</strong>&amp;x_provider=facebook&amp;response_type=token<br>
+响应：<br>
+http://attacker.com/#.victim.com/?access_token=abcd123</p>
+<p>会发现最终授权码被发送至攻击者的服务器。</p>
+<p>以上两个是在测试集成了OAuth组件的网站时最常见的漏洞，漏洞发现的方式很简单（重定向和CSRF），但是危害却非常的大（账号接管）。<br>
+当然关于OAuth还有很多其他方面的漏洞，比如说：<br>
+<strong>scope范围认证不当</strong><br>
+用户没有授权DM功能，但是token具有发送DM的权限。<br>
+https://shkspr.mobi/blog/2018/12/twitter-bug-bounty/<br>
+<strong>越权漏洞</strong><br>
+应用方使用ID来绑定第三方的信息，攻击者可以通过修改ID去获取他人信息。<br>
+https://apisecurity.io/issue-134-api-vulnerabilities-echelon-instagram-facebook-workspace/<br>
+<strong>认证绕过</strong><br>
+应用方使用了第三方的邮箱来当作用户邮箱，但是第三方可能不会进行邮箱验证，这可能导致发生在应用方的邮箱认证绕过。</p>
+<p>本文列出了两个OAuth最通用最常见的两个漏洞，当然还有很多OAuth相关的漏洞我没有列出来比如说SSRF、Client伪造，有兴趣的小伙伴可以自行搜索。</p>
+<p>参考链接：<br>
+http://nbsriharsha.blogspot.com/2016/04/oauth-20-redirection-bypass-cheat-sheet.html<br>
+https://www.yuque.com/pmiaowu/web_security_1/oauth?language=en-us<br>
+https://shkspr.mobi/blog/2018/12/twitter-bug-bounty/<br>
+https://apisecurity.io/issue-134-api-vulnerabilities-echelon-instagram-facebook-workspace/<br>
+https://wooyun.js.org/drops/OAuth%202.0%E5%AE%89%E5%85%A8%E6%A1%88%E4%BE%8B%E5%9B%9E%E9%A1%BE.html</p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/amUzoEOq9/" class="tag">
+                    信息安全
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/ying-ji-xiang-ying-xue-xi-zong-jie/">
+                  <h3 class="post-title">
+                    应急响应总结
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

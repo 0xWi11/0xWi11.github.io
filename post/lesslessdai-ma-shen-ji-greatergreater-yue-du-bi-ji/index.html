@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>《代码审计》阅读笔记 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="随手做的笔记，所以说笔记内容会有点乱。
+配置文件
+config.php cache.config.php
+文件读取函数
+file_get_contents（）、highlight_file（）、fopen（）、readfile（）、frea..." />
+    <meta name="keywords" content="信息安全,代码审计" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">《代码审计》阅读笔记</h2>
+            <div class="post-date">2019-03-15</div>
+            
+            <div class="post-content" v-pre>
+              <p>随手做的笔记，所以说笔记内容会有点乱。</p>
+<h1 id="配置文件">配置文件</h1>
+<p>config.php cache.config.php</p>
+<h1 id="文件读取函数">文件读取函数</h1>
+<p>file_get_contents（）、highlight_file（）、fopen（）、readfile（）、fread（）、fgetss（）、fgets（）、parse_ini_file（）、show_source（）、file（）</p>
+<h1 id="文件上传函数">文件上传函数</h1>
+<p>move_uploaded_file（）</p>
+<h1 id="xss">xss</h1>
+<p>print、print_r、echo、printf、sprintf、die、var_dump、var_export</p>
+<h1 id="注入">注入</h1>
+<h2 id="报错注入">报错注入</h2>
+<p>floor（）、updatexml（）以及extractvalue（）</p>
+<p>GeometryCollection（）、polygon（）、GTID_SUBSET（）、multipoint（）、multilinestring（）、multipolygon（）、LINESTRING（）、exp（）</p>
+<h3 id="geometrycollection">GeometryCollection()</h3>
+<p>id = 1 AND GeometryCollection（（select * from（select * from（select user（））a）b））</p>
+<h3 id="polygon">polygon()</h3>
+<p>id = 1 AND polygon（（select * from（select * from（select user（））a）b））</p>
+<h3 id="multipoint">multipoint()</h3>
+<p>id = 1 AND multipoint（（select * from（select * from（select user（））a）b））</p>
+<h3 id="multilinestring">multilinestring()</h3>
+<p>id = 1 AND multilinestring（（select * from（select * from（select user（））a）b））</p>
+<h3 id="multipolygon">multipolygon()</h3>
+<p>id = 1 AND multipolygon（（select * from（select * from（select user（））a）b））</p>
+<h3 id="linestring">linestring()</h3>
+<p>id = 1 AND LINESTRING（（select * from（select * from（select user（））a）b））</p>
+<h3 id="exp">exp()</h3>
+<p>id = 1 and EXP（~（SELECT*from（SELECT user（））a））</p>
+<h2 id="二次urldecode注入">二次urldecode注入</h2>
+<p>addslashes（）、mysql_real_escape_string（）、mysql_escape_string（）转义符号</p>
+<p>urldecode或者rawurldecode函数解码</p>
+<h2 id="宽字节注入">宽字节注入</h2>
+<p>set character_set_client=gbk</p>
+<h2 id="过滤函数">过滤函数</h2>
+<p>1、magic_quotes_gpc负责对GET、POST、COOKIE的值进行过滤。</p>
+<p>2、magic_quotes_runtime对从数据库或者文件中获取的数据进行过滤。</p>
+<p>3、addslashes函数，参数必须是string型</p>
+<p>4、mysql_[real_]escape_string函数，转义字符串</p>
+<p>5、intval取整函数，针对int型</p>
+<h1 id="文件包含">文件包含</h1>
+<p>include（）、include_once（）、require（）和require_once（）</p>
+<h1 id="代码执行漏洞">代码执行漏洞</h1>
+<p>eval（）、assert（）、preg_replace（）、call_user_func（）、call_user_func_array（）、array_map（）</p>
+<p>call_user_func（）、call_user_func_array（）、array_map（）<br>
+usort（）、uasort（）、uksort（）、array_filter（）、array_reduce（）、array_diff_uassoc（）、array_diff_ukey（）<br>
+array_udiff（）、array_udiff_assoc（）、array_udiff_uassoc（）<br>
+array_intersect_assoc（）、array_intersect_uassoc（）<br>
+array_uintersect（）、array_uintersect_assoc（）<br>
+array_uintersect_uassoc（）、array_walk（）、array_walk_recursive（）<br>
+xml_set_character_data_handler（）、xml_set_default_handler（）<br>
+xml_set_element_handler（）、xml_set_end_namespace_decl_handler（）<br>
+xml_set_external_entity_ref_handler（）、xml_set_notation_decl_handler（）<br>
+xml_set_processing_instruction_handler（）<br>
+xml_set_start_namespace_decl_handler（）<br>
+xml_set_unparsed_entity_decl_handler（）、stream_filter_register（）<br>
+set_error_handler（）、register_shutdown_function（）、register_tick_function（）</p>
+<h1 id="命令执行漏洞">命令执行漏洞</h1>
+<p>system（）、exec（）、shell_exec（）、passthru（）、pcntl_exec（）、popen（）、proc_open（）</p>
+<h2 id="命令执行过滤">命令执行过滤</h2>
+<p>1、escapeshellcmd(), 过滤整条命令.</p>
+<p>2、escapeshellarg(),保证传入命令执行函数的参数是一字符串的形式存在的.</p>
+<p>过滤了<br>
+'&amp;'、'；'、'`'、'|'、'*'、'？'、'~'、'&lt;'、'&gt;'、'^'、'（'、'）'、'['、']'、'{'、'}'、'$'、''、'\x0A'、'\xFF'、’%’，'和&quot;</p>
+<h1 id="变量覆盖漏洞">变量覆盖漏洞</h1>
+<p>extract（）函数和parse_str（）</p>
+<p>import_request_variables（）函数则是用在没有开启全局变量注册的时候，调用了这个函数则相当于开启了全局变量注册，在PHP 5.4之后这个函数已经被取消。</p>
+<h1 id="逻辑漏洞">逻辑漏洞</h1>
+<p>1、in_array()判断是否属于数组中的一个.</p>
+<p>2、is_numeric()判断是否一个变量是数字,这里可以通过提交hex编码直接绕过,返回ture</p>
+<p>3、<code>==</code>和<code>===</code> ,===加入了类型判断</p>
+<h1 id="特殊点">特殊点</h1>
+<p>1、$_SERVER变量不受gpc保护.</p>
+<p>2、mb_convert_encoding也有可能出现编码转换问题</p>
+<p>3、显示错误信息需要打开php.ini中的display_errors=on或者在代码中加入error_reporting()函数,其中最常用的是E_ALL、E_WARNING、E_NOTICE、E_ALL代表提示所有问题，E_WARNING代表显示错误信息，E_NOTICE则是显示基础提示信息。</p>
+<p>4、iconv函数编码截断,如果出现chr(128)到chr(255)之间的字符,就可以截断</p>
+<p>5、php文件输入流</p>
+<pre><code>php：//stdin
+php：//stdout
+php：//stderr 
+php：//input
+php：//output 
+php：//fd 
+php：//memory
+php：//temp 
+php：//filter
+php://input是读取post提交上来的数据,output是将数据流输出,php://filter是一个文件操作协议,效果类似readfile(),file(),file_get_contents(),
+</code></pre>
+<p>6、php代码解析标签</p>
+<ul>
+<li>
+<script language="php">...</script>
+</li>
+<li>
+<?..?>(需要short_open_tag=on,默认开启)
+</li>
+</ul>
+<p>7、正则表达式没有验证开头和结尾^$</p>
+<p>8、windows findfirstfile利用12&lt;&lt;可以读取123456.txt</p>
+<p>9、php可变变量,$$可以覆盖变量,双引号中的变量可能会被解析,</p>
+<pre><code>&lt;？php $a=&quot;${@phpinfo（）}&quot;；？&gt;
+
+$a = &quot;${ phpinfo（）}&quot;；    @换为空格
+$a = &quot;${      phpinfo（）}&quot;； tab
+$a = &quot;${/**/phpinfo（）}&quot;； 
+甚至回车+-!~\都可以
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/amUzoEOq9/" class="tag">
+                    信息安全
+                  </a>
+                
+                  <a href="https://0xwi11.github.io/tag/XSg-eSjSDb/" class="tag">
+                    代码审计
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/xxe-xue-xi-bi-ji/">
+                  <h3 class="post-title">
+                    XXE学习笔记
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

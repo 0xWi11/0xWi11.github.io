@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>应急响应总结 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="攻击者目的：
+勒索、挖矿、数据、权限
+挖矿：
+  表象：CPU增高、可疑定时任务、外联矿池IP。
+  告警：威胁情报（主要）、Hids、蜜罐（挖矿扩散时触发）
+  动作：通过CPU确认异常情况→ 确认可疑进程 → 检查定时任务、主机服务、守..." />
+    <meta name="keywords" content="信息安全" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">应急响应总结</h2>
+            <div class="post-date">2020-09-11</div>
+            
+            <div class="post-content" v-pre>
+              <p>攻击者目的：<br>
+勒索、挖矿、数据、权限</p>
+<p>挖矿：</p>
+<pre><code>  表象：CPU增高、可疑定时任务、外联矿池IP。
+  告警：威胁情报（主要）、Hids、蜜罐（挖矿扩散时触发）
+  动作：通过CPU确认异常情况→ 确认可疑进程 → 检查定时任务、主机服务、守护进程→结束病毒进程，删除病毒文件-&gt;加固。
+</code></pre>
+<p>WebShell:</p>
+<pre><code>  表象：业务侧应用逻辑漏洞（允许上传脚本等造成命令执行）或者开源软件低版本造成（fastjson等）导致，通常为反弹shell、高危命令执行，同时存在内网入侵、恶意程序传播、数据盗取等行为。
+  告警：Hids（主要）、流量监控设备
+  动作：确认Webshell文件内容与可用性→ 酌情断网，摘掉公网出口IP→ 通过日志等确认Webshell文件访问记录→ 确定Webshell入侵来源，是业务逻辑漏洞导致、开源组件漏洞还是弱口令与未授权等情况导致 →排查应用其他机器情况，全盘扫描Webshell文件→ 缩容机器，修复相关问题重新恢复应用开放。
+</code></pre>
+<p>内网入侵:</p>
+<pre><code>  表象：以入侵的跳板机为源头进行端口扫描、SSH爆破、内网渗透操作、域控攻击等。
+  告警：Hids（主要）、蜜罐、域控监控（ATA等）
+  动作：确定入侵边界再进行处理，通常蜜罐等存在批量扫描爆破记录，需登录前序遭入侵机器确认情况，方便后续批量处理，这个情况较为复杂后期单独写一篇文章。
+
+</code></pre>
+<p><strong>防御常识：</strong><br>
+入侵一般都会留下痕迹  入侵响应的核心无外乎四个字，顺藤摸瓜。</p>
+<ol>
+<li>攻击会产生流量</li>
+<li>回连会产生流量</li>
+<li>程序执行日志、命令执行日志、程序启动时间、文件创建修改时间、账户日志、登录日志</li>
+</ol>
+<p>这里借用先知上一位师傅的处理流程思路图，虽然说在实际场景上可能不需要完成整个流程，但是这个流程图还是能够给出一个很好的处理思路：<br>
+<img src="https://0xwi11.github.io/post-images/1678614793930.png" alt="" loading="lazy"></p>
+<p>应急的顺序</p>
+<ol>
+<li>断网、封IP、下线应用</li>
+<li>分析查看报警、上机排查，取证样本、日志、命令、等多个攻击载荷推断攻击者的行为和影响面和感染程度。</li>
+<li>配合流量告警、安全设备、依次上机排查。</li>
+<li>根除攻击者的维权操作以及加固，防止二次入侵。</li>
+</ol>
+<h2 id="linux主机分析">Linux主机分析</h2>
+<p><strong>文件分析</strong><br>
+查找新增文件、可疑文件、最近使用过的文件、webshell排查、temp文件夹</p>
+<pre><code>ls
+find ./ -mtime 0 -name &quot;*222.jsp&quot; #查找24小时之内被修改过的文件
+find / -ctime -2
+grep
+</code></pre>
+<p>根据文件大小特征查找</p>
+<pre><code>find / -size 123123123
+</code></pre>
+<p>根据文件创建时间修改时间查找</p>
+<pre><code>find 路径 -ctime 
+</code></pre>
+<p>检查临时目录</p>
+<pre><code>/tmp
+/var/tmp
+</code></pre>
+<p><strong>进程分析</strong></p>
+<pre><code>netstat -antlp | more
+ps aux | gerp pid
+lsof -i:8080
+chkconfig -list #命令也可列出所有的服务
+</code></pre>
+<p><strong>查看隐藏进程</strong></p>
+<pre><code>ls /proc | sort -n |uniq &gt;2
+diff 1 2
+</code></pre>
+<p><strong>定位进程</strong></p>
+<pre><code>ls -la /proc/PID/exe
+file /proc/PID/exe
+ps aux | grep PID
+</code></pre>
+<p><strong>杀死进程</strong></p>
+<pre><code>kill -9
+</code></pre>
+<p><strong>查看进占用端口</strong></p>
+<pre><code>lsof -p PID
+</code></pre>
+<p>仔细检查远程连接、计划任务<br>
+<strong>系统信息</strong></p>
+<pre><code>history
+crontab
+last
+/etc/init.d
+stat /usr/sbin/useradd 
+cat /etc/passwd | grep -E &quot;/bin/bash$&quot;（查看能够登录的用户）
+ssh文件
+kill -9 PID（删除进程）
+工具chkrootkit查杀后门、GScan
+</code></pre>
+<p>环境变量、账号信息、history、登录记录<br>
+<strong>日志分析</strong><br>
+linux日志</p>
+<pre><code>/var/log/
+</code></pre>
+<p><strong>应用日志分析</strong></p>
+<pre><code>access.log
+Error.log
+</code></pre>
+<p><strong>检查网络</strong></p>
+<pre><code>lsof -i:&quot;PORT&quot; #查看端口占用情况
+netstat
+</code></pre>
+<p><strong>检查系统命令</strong></p>
+<pre><code>alias
+~/.bashrc
+</code></pre>
+<h2 id="windows主机分析">Windows主机分析</h2>
+<p>检查开机项、计划任务、创建时间、查看上传目录的上传的东西的时间<br>
+1、隐藏文件设置<br>
+2、启动项</p>
+<pre><code>C盘USER用户目录下的启动文件夹
+任务管理器
+注册表
+正在运行的服务
+</code></pre>
+<p>3、检查历史痕迹</p>
+<pre><code>最近打开的文件  C:\Users\用户名\Recen
+临时文件 %temp%
+浏览器历史记录
+文件时间：关注最近创建的文件（Everything）
+操作历史记录 doskey /HISTORY
+应用程序执行记录 C:\Windows\Prefetch
+安装包 控制面板/程序与功能
+</code></pre>
+<p>4、进程分析</p>
+<pre><code>查看分析建立连接的IP和端口 netstat -ano | find &quot;ESTABLISHED&quot;
+定位程序名字  tasklist /svc | find &quot;PID&quot;
+定位可疑程序路径 wmic process | find &quot;xxx.exe&quot;
+杀死可疑程序
+    taskkill /PID
+    killall &lt;进程名&gt;
+    taskkill /im 进程名 /f
+wmic查询进程 wmic process list brief
+</code></pre>
+<p>5、异常计划任务查看</p>
+<pre><code>at
+schtasks
+</code></pre>
+<p>6、账号安全排查</p>
+<pre><code>HKEY_LOCAL_MACHINE\SAM\SAM\
+</code></pre>
+<p>7、恶意程序的发现与停止与删除</p>
+<pre><code>process explorer
+    (1)没有签名验证信息的进程
+    (2)没有描述信息的进程
+    (3)路径不合法的进程
+    (4)CPU或者内存长时间过高占用的进程
+    (5)存在异常网络连接的进程
+    (6)属主异常的进程
+PChunter
+火绒剑
+</code></pre>
+<p>10、日志分析</p>
+<pre><code>eventvwr
+</code></pre>
+<p><strong>进程查看</strong></p>
+<pre><code>netstat -ano
+tasklist
+</code></pre>
+<p><strong>系统信息</strong></p>
+<pre><code>set 查看环境变量、账号信息（隐藏账号）
+systeminfo 查看补丁状态
+</code></pre>
+<p><strong>后门查看器</strong><br>
+PC hunter、河马、D盾<br>
+<strong>日志分析</strong></p>
+<pre><code>eventvwr
+</code></pre>
+<p>win的日志记录了用户的登录情况非常的详细。</p>
+<h2 id="分析工具">分析工具</h2>
+<p>1、流量分析工具<br>
+Wireshark、TCPView 科来⽹络<br>
+2、分析工具<br>
+tcpdump<br>
+3、进程分析工具<br>
+ProcessHacker<br>
+PCHunter<br>
+4、启动项分析工具<br>
+AutoRuns<br>
+火绒<br>
+5、专杀工具<br>
+6、内存扫描工具<br>
+MemScanne</p>
+<h2 id="威胁情报平台">威胁情报平台</h2>
+<p>微步威胁平台：<a href="https://x.threatbook.cn/">https://x.threatbook.cn/</a><br>
+奇安信威胁情报中心： <a href="https://ti.qianxin.com/">https://ti.qianxin.com/</a><br>
+360威胁情报中心 ： <a href="https://ti.360.cn/#/homepage">https://ti.360.cn/#/homepage</a><br>
+绿盟 威胁情报中心：<a href="https://nti.nsfocus.com/">https://nti.nsfocus.com/</a><br>
+VenusEye威胁情报中心：<a href="https://www.venuseye.com.cn/">https://www.venuseye.com.cn/</a><br>
+安恒威胁情报中心 ：<a href="https://ti.dbappsecurity.com.cn/">https://ti.dbappsecurity.com.cn/</a><br>
+360网络安全研究：http://netlab.360.com/<br>
+AlienVault : <a href="https://otx.alienvault.com/">https://otx.alienvault.com/</a><br>
+ISC SANS威胁检测： <a href="https://isc.sans.edu/">https://isc.sans.edu/</a><br>
+RedQueen安全智能服务平台：<a href="https://redqueen.tj-un.com/IntelHome.html">https://redqueen.tj-un.com/IntelHome.html</a><br>
+IBM情报中心：<a href="https://exchange.xforce.ibmcloud.com/">https://exchange.xforce.ibmcloud.com/</a></p>
+<h2 id="恶意样本分析网站集合">恶意样本分析网站集合</h2>
+<p>微步沙盒: <a href="https://s.threatbook.cn/">https://s.threatbook.cn/</a><br>
+腾讯哈勃分析系统: <a href="https://habo.qg.com/">https://habo.qg.com/</a><br>
+魔盾: <a href="https://www.maldun.com/analysis/">https://www.maldun.com/analysis/</a><br>
+微点沙盒: <a href="https://sandbox.depthsec.com.cn/index.php/">https://sandbox.depthsec.com.cn/index.php/</a><br>
+奇安信文件深度分析平台: <a href="https://sandbox.ti.qianxin.com/sandbox/page">https://sandbox.ti.qianxin.com/sandbox/page</a><br>
+ANYRUN : <a href="https://app.any.run/">https://app.any.run/</a><br>
+HybridAnalysis (Falcon Sandbox) : <a href="https://www.hybrid-analysis.com/">https://www.hybrid-analysis.com/</a><br>
+CAPE Sandbox: <a href="https://capesandbox.com/">https://capesandbox.com/</a><br>
+BD Sandbox Analyzer : <a href="https://www.bitdefender.com/business/enterprise-products/sandbox-analyzer.html">https://www.bitdefender.com/business/enterprise-products/sandbox-analyzer.html</a><br>
+Joe Sanbox: <a href="https://www.joesandbox.com/">https://www.joesandbox.com/</a></p>
+<p><strong>参考文章：</strong><br>
+<a href="https://yinwc.github.io/2020/01/21/%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94%E7%AC%94%E8%AE%B0%E4%B9%8BLinux%E7%AF%87/#/%E4%B8%80%E4%BA%9B%E6%8A%80%E5%B7%A7">https://yinwc.github.io/2020/01/21/%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94%E7%AC%94%E8%AE%B0%E4%B9%8BLinux%E7%AF%87/#/%E4%B8%80%E4%BA%9B%E6%8A%80%E5%B7%A7</a><br>
+<a href="https://www.cnblogs.com/richardlee97/p/10673006.html">https://www.cnblogs.com/richardlee97/p/10673006.html</a></p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/amUzoEOq9/" class="tag">
+                    信息安全
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/lesslessnei-wang-an-quan-gong-fang-shen-tou-ce-shi-shi-zhan-zhi-nan-greatergreater-bi-ji/">
+                  <h3 class="post-title">
+                    《内网安全攻防-渗透测试实战指南》笔记
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

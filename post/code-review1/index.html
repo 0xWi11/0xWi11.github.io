@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>记一次SSM框架的代码审计 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="代码审计可以说是安全从业者必备的基本能力了，代码审计在各种场景都需要用到，比如渗透测试、漏洞研究、企业安全运营等。比如说总所周知的SDL开发流程，代码审计在其中也发挥了重要的作用。
+简单的代码审计流程可以是这样的：
+1、熟悉业务流程。
+2、..." />
+    <meta name="keywords" content="信息安全,代码审计" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">记一次SSM框架的代码审计</h2>
+            <div class="post-date">2021-10-24</div>
+            
+            <div class="post-content" v-pre>
+              <p>代码审计可以说是安全从业者必备的基本能力了，代码审计在各种场景都需要用到，比如渗透测试、漏洞研究、企业安全运营等。比如说总所周知的SDL开发流程，代码审计在其中也发挥了重要的作用。</p>
+<p><strong>简单的代码审计流程可以是这样的：</strong><br>
+1、熟悉业务流程。<br>
+2、分析程序架构，根据不同的架构有不同的审计流程。<br>
+3、人工审计。<br>
+4、工具审计。</p>
+<p>下面来介绍本次要审计的SSM框架<br>
+SSM框架，即SpringMVC+Spring+Mybatis三个开源框架整合在一起的缩写。</p>
+<h1 id="11-springmvc">1.1 SpringMVC</h1>
+<p>是一种基于Java的实现MVC设计模式的请求驱动类型的轻量级Web框架，使用了MVC架构模式的思想，将web层进行职责解耦，基于请求驱动指的就是使用请求-响应模型，框架的目的就是帮助我们简化开发。</p>
+<h1 id="12-spring">1.2 Spring</h1>
+<p>是分层的 Java SE/EE full-stack 轻量级开源框架，以 IOC（Inverse of Control，控制反转）和 AOP（Aspect Oriented Programming，面向切面编程）为内核，使用基本的 JavaBean 完成以前只可能由 EJB 完成的工作，取代了 EJB 臃肿和低效的开发模式，Spring的用途不仅仅限于服务器端的开发。从简单性、可测试性和松耦合性角度而言，绝大部分Java应用都可以从Spring中受益。</p>
+<h1 id="13-mybatis">1.3 Mybatis</h1>
+<p>是支持定制化 SQL、存储过程以及高级映射的优秀的持久层框架。MyBatis 避免了几乎所有的 JDBC 代码和手动设置参数以及获取结果集。MyBatis 可以对配置和原生Map使用简单的 XML 或注解，将接口和 Java 的 POJOs(Plain Old Java Objects,普通的 Java对象)映射成数据库中的记录。</p>
+<h1 id="14-servlet">1.4 Servlet</h1>
+<p>还有一项技术虽然名称没有出现在这三个开源框架中但是SpringMVC的底层就是以此技术进行构建的，这项技术就是Servlet。</p>
+<p>Servlet是基于Java技术的Web组件，由容器管理并产生动态的内容。Servlet与客户端通过Servlet容器实现的请求/响应模型进行交互。</p>
+<p>相对以SSM框架搭建的java web项目进行审计，上述这些都是要有一定程度的了解的。</p>
+<p><strong>上面说明过对于不同的架构会有不同的审计方式，所以说针对这次SSM框架，我们可以遵循下方的流程来审计。</strong><br>
+1、熟悉业务流程。<br>
+2、阅读配置文件。<br>
+3、阅读可能存在漏洞的功能点。<br>
+4、通读Controller模块。<br>
+5、工具审计。</p>
+<h1 id="审计流程">审计流程</h1>
+<p>搭建的流程以及系统的名字略过，审计的系统是在其他审计的文章中找到的，很容易搜到相关文章可以自行查找。</p>
+<h1 id="1熟悉业务流程">1.熟悉业务流程</h1>
+<p><img src="https://0xwi11.github.io/post-images/1635064000676.png" alt="" loading="lazy"><br>
+这个系统是一个在线教育系统，简单来说就是卖网课的，学生可以在网站上看学习视频，发表评论，功能点不是很多，在个人中心可以修改资料，上传头像。</p>
+<h1 id="2阅读配置文件">2.阅读配置文件</h1>
+<p>在熟悉完流程之后，开始看代码，首先是配置文件<br>
+在红框内的都是我们需要去查看的配置文件<br>
+<img src="https://0xwi11.github.io/post-images/1635064017803.png" alt="" loading="lazy"><br>
+这个文件相对比较重要，这里我们可以发现对于路由的鉴权是怎样的，此处是一个伏笔。<br>
+<img src="https://0xwi11.github.io/post-images/1635064029154.png" alt="" loading="lazy"><br>
+还可以看看pom.xml里面项目引入了什么依赖<br>
+<img src="https://0xwi11.github.io/post-images/1635064035422.png" alt="" loading="lazy"><br>
+好的，在阅读完配置文件之后我们开始对一些可疑的功能点进行审计。</p>
+<h1 id="3阅读可能存在漏洞的功能点">3.阅读可能存在漏洞的功能点</h1>
+<h1 id="31-任意文件上传">3.1 任意文件上传</h1>
+<p>用户可以修改个人头像<br>
+<img src="https://0xwi11.github.io/post-images/1635064044838.png" alt="" loading="lazy"><br>
+相关请求<br>
+<img src="https://0xwi11.github.io/post-images/1635064049434.png" alt="" loading="lazy"><br>
+我们根据URL去寻找相关代码<br>
+在SSM框架中我们就只需要寻找@RequestMapping 注解中包含<code>gok4</code>的文件就可以了<br>
+<img src="https://0xwi11.github.io/post-images/1635064055894.png" alt="" loading="lazy"><br>
+但是刚开始的时候发现并找不到相关的文件，说明这个功能可能并不是代码文件中提供的，我们可以在IDEA底下的Spring标签中找到所有的Controllers，可以看到这个功能是由导入的lib中实现的。<br>
+<img src="https://0xwi11.github.io/post-images/1635064063688.png" alt="" loading="lazy"><br>
+找到代码之后我们开始审计</p>
+<pre><code class="language-java">public String gok4(HttpServletRequest request, HttpServletResponse response, @RequestParam(value = &quot;uploadfile&quot;,required = true) MultipartFile uploadfile, @RequestParam(value = &quot;param&quot;,required = false) String param, @RequestParam(value = &quot;fileType&quot;,required = true) String fileType, @RequestParam(value = &quot;pressText&quot;,required = false) String pressText) {
+        try {
+            long maxSize = 4096000L;
+            System.out.println(uploadfile.getSize());
+            if (uploadfile.getSize() &gt; maxSize) {
+                return this.responseErrorData(response, 1, &quot;上传的图片大小不能超过4M。&quot;);
+            } else {
+                String[] type = fileType.split(&quot;,&quot;);
+                this.setFileTypeList(type);
+                String ext = FileUploadUtils.getSuffix(uploadfile.getOriginalFilename());
+                if (fileType.contains(ext) &amp;&amp; !&quot;jsp&quot;.equals(ext)) {
+                    String filePath = this.getPath(request, ext, param);
+                    File file = new File(this.getProjectRootDirPath(request) + filePath);
+                    if (!file.getParentFile().exists()) {
+                        file.getParentFile().mkdirs();
+                    }
+
+                    uploadfile.transferTo(file);
+                    return this.responseData(filePath, 0, &quot;上传成功&quot;, response);
+                } else {
+                    return this.responseErrorData(response, 1, &quot;文件格式错误，上传失败。&quot;);
+                }
+            }
+        } catch (Exception var13) {
+            logger.error(&quot;gok4()--error&quot;, var13);
+            return this.responseErrorData(response, 2, &quot;系统繁忙，上传失败&quot;);
+        }
+    }
+</code></pre>
+<p>唯一的过滤是在<code>if (fileType.contains(ext) &amp;&amp; !&quot;jsp&quot;.equals(ext))</code><br>
+fileType是我们可以控的，但是后缀不能够为jsp，这时就可以使用末尾添加::$DATA截断上传。<br>
+成功上传jsp文件<br>
+<img src="https://0xwi11.github.io/post-images/1635064071596.png" alt="" loading="lazy"></p>
+<p>还存在另外一个任意文件上传点<code>/video/uploadvideo</code>，而且没有后缀限制。</p>
+<h1 id="32-sql注入">3.2 SQL注入</h1>
+<p>在mybatis中，如果Mapper中的语句传递参数使用的是<code>${}</code>而不是<code>#{}</code>的话就会发生sql注入问题，#{}在底层是使用了预编译来实现的（PrepareStatement）。<br>
+如果说项目使用了mybatis的话，有一种方法可以快速的找出可能存在的sql注入问题。<br>
+在IDEA界面 <code>ctrl + shift + f</code> 搜索 <code>${</code><br>
+就可以找出大部分的sql注入问题。<br>
+<img src="https://0xwi11.github.io/post-images/1635064078019.png" alt="" loading="lazy"><br>
+我们来看看这个<code>deleteCourseFavoritesById</code><br>
+<img src="https://0xwi11.github.io/post-images/1635064083444.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1635064841580.png" alt="" loading="lazy"><br>
+可以看到是根本没有任何过滤的，在配置文件中也没有看到关于的过滤。<br>
+于是可以直接注入<br>
+<img src="https://0xwi11.github.io/post-images/1635064094436.png" alt="" loading="lazy"></p>
+<p>注入点也不止这一个，大多都是相似的就不多说。</p>
+<h1 id="4-controller">4. Controller</h1>
+<p>可能存在问题的功能点看完了，可以依次看看Controller</p>
+<h1 id="41-反射型xss">4.1 反射型XSS</h1>
+<p>在IDEA下方的Spring窗口中依次查看Controller，首先先跳过需要鉴权的admin目录，看到<code>DialogController.class</code>文件。<br>
+<img src="https://0xwi11.github.io/post-images/1635064945719.png" alt="" loading="lazy"></p>
+<pre><code class="language-java">@RequestMapping({&quot;/common/dialog&quot;})
+    public String getDialog(HttpServletRequest request, Model model) {
+        try {
+            Map&lt;String, Object&gt; mapDialog = new HashMap();
+            mapDialog.put(&quot;title&quot;, request.getParameter(&quot;title&quot;));
+            mapDialog.put(&quot;context&quot;, request.getParameter(&quot;context&quot;));
+            mapDialog.put(&quot;height&quot;, request.getParameter(&quot;height&quot;) == null ? 157 : request.getParameter(&quot;height&quot;));
+            model.addAttribute(&quot;dialog&quot;, mapDialog);
+            return &quot;/common/dialog&quot;;
+        } catch (Exception var4) {
+            logger.error(&quot;getDialog&quot;, var4);
+            return this.setExceptionRequest(request, var4);
+        }
+    }
+</code></pre>
+<p>代码的意思就是从请求中获取参数，然后再返回到视图，中间好像没有任何过滤，试一试XSS payload。<br>
+<img src="https://0xwi11.github.io/post-images/1635064158607.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1635064162516.png" alt="" loading="lazy"><br>
+成功弹窗</p>
+<h1 id="42-用户信息泄露">4.2 用户信息泄露</h1>
+<p>从配置文件我们可以知道 <code>admin</code> 和 <code>uc</code> 目录都有相关的鉴权操作，但是发现到一些可疑的路由<br>
+<img src="https://0xwi11.github.io/post-images/1635064188247.png" alt="" loading="lazy"><br>
+尝试不带Cookie访问<br>
+<img src="https://0xwi11.github.io/post-images/1635064177283.png" alt="" loading="lazy"><br>
+如果是国外的SRC这算是严重漏洞了。<br>
+当然其他的端点也有同样的问题，这里就不重复说了。<br>
+这一部分我并没践行好，没有将所有的Controller看完，毕竟通读所有代码还是比较耗时的。</p>
+<h1 id="5工具审计">5.工具审计</h1>
+<p>我这里使用的是fortify，扫描用了半个小时。<br>
+看了一遍除了sql注入之外，没有很好可以直接利用的漏洞<br>
+<img src="https://0xwi11.github.io/post-images/1635064192639.png" alt="" loading="lazy"></p>
+<h1 id="小结">小结</h1>
+<p>对于这个系统我并没有进行彻底的审计，但是从上面的漏洞看来此系统在设计之初并没有考虑到安全设计的方面，所以导致存在很多简单但又有危害的漏洞。<br>
+其实对于一般web应用来说代码审计并不是很难的事情，SSM框架审计漏洞的方式同正常的java代码审计没有区别，网上有很多非常优秀的java代码审计文章，关于每个漏洞的审计方式写的都非常全面，我们需要的就只是将其移植到SSM框架的审计中来，我们明白SSM的执行流程了，自然就明白了该怎么在SSM框架中跟踪参数。</p>
+<h1 id="参考资料">参考资料</h1>
+<p><a href="https://paper.seebug.org/1075/#3-ssm">https://paper.seebug.org/1075/#3-ssm</a><br>
+<a href="https://p0rz9.github.io/2019/05/11/SSM%E6%A1%86%E6%9E%B6%E5%AE%A1%E8%AE%A1%E6%80%9D%E8%B7%AF/">https://p0rz9.github.io/2019/05/11/SSM%E6%A1%86%E6%9E%B6%E5%AE%A1%E8%AE%A1%E6%80%9D%E8%B7%AF/</a><br>
+<a href="https://blog.nowcoder.net/n/be73b8f592504ae8b1d00368433061be">https://blog.nowcoder.net/n/be73b8f592504ae8b1d00368433061be<br>
+</a></p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/amUzoEOq9/" class="tag">
+                    信息安全
+                  </a>
+                
+                  <a href="https://0xwi11.github.io/tag/XSg-eSjSDb/" class="tag">
+                    代码审计
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/ysoserial-commonscollections-2/">
+                  <h3 class="post-title">
+                    ysoserial CommonsCollections2 学习
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

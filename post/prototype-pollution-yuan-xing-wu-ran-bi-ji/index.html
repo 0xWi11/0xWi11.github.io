@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Prototype pollution原型污染笔记 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="Javascript原型链参考文章：继承与原型链
+关于原型链
+文章内关于原型和原型链的知识写的非常详细，就不再总结整个过程了，以下为几个比较重要的点：
+
+在javascript，每一个实例对象都有一个prototype属性，prototyp..." />
+    <meta name="keywords" content="信息安全" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Prototype pollution原型污染笔记</h2>
+            <div class="post-date">2020-02-19</div>
+            
+            <div class="post-content" v-pre>
+              <p>Javascript原型链参考文章：<a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Inheritance_and_the_prototype_chain">继承与原型链</a></p>
+<h2 id="关于原型链">关于原型链</h2>
+<p>文章内关于原型和原型链的知识写的非常详细，就不再总结整个过程了，以下为几个比较重要的点：</p>
+<ul>
+<li>在javascript，每一个实例对象都有一个prototype属性，prototype 属性可以向对象添加属性和方法。<br>
+例子：</li>
+</ul>
+<pre><code>object.prototype.name=value
+</code></pre>
+<ul>
+<li>在javascript，每一个实例对象都有一个<code>__proto__</code>属性，这个实例属性指向对象的原型对象(即原型)。可以通过以下方式访问得到某一实例对象的原型对象：</li>
+</ul>
+<pre><code>objectname[&quot;__proto__&quot;]
+objectname.__proto__
+objectname.constructor.prototype
+</code></pre>
+<ul>
+<li>不同对象所生成的原型链如下(部分)：</li>
+</ul>
+<pre><code>var o = {a: 1};
+// o对象直接继承了Object.prototype
+// 原型链：
+// o ---&gt; Object.prototype ---&gt; null
+
+var a = [&quot;yo&quot;, &quot;whadup&quot;, &quot;?&quot;];
+// 数组都继承于 Array.prototype
+// 原型链：
+// a ---&gt; Array.prototype ---&gt; Object.prototype ---&gt; null
+
+function f(){
+  return 2;
+}
+// 函数都继承于 Function.prototype
+// 原型链：
+// f ---&gt; Function.prototype ---&gt; Object.prototype ---&gt; null
+</code></pre>
+<h1 id="原型链污染原理">原型链污染原理</h1>
+<p>对于语句：<code>object[a][b] = value</code> 如果可以控制a、b、value的值，将a设置为<code>__proto__</code>，我们就可以给object对象的原型设置一个b属性，值为value。这样所有继承object对象原型的实例对象在本身不拥有b属性的情况下，都会拥有b属性，且值为value。</p>
+<p>来看一个简单的例子：</p>
+<pre><code>object1 = {&quot;a&quot;:1, &quot;b&quot;:2};
+object1.__proto__.foo = &quot;Hello World&quot;;
+console.log(object1.foo);
+object2 = {&quot;c&quot;:1, &quot;d&quot;:2};
+console.log(object2.foo);
+</code></pre>
+<p><img src="https://0xwi11.github.io/post-images/1678695207295.png" alt="" loading="lazy"><br>
+最终会输出两个Hello World。为什么object2在没有设置foo属性的情况下，也会输出Hello World呢？就是因为在第二条语句中，我们对object1的原型对象设置了一个foo属性，而object2和object1一样，都是继承了Object.prototype。在获取object2.foo时，由于object2本身不存在foo属性，就会往父类Object.prototype中去寻找。这就造成了一个原型链污染，所以原型链污染简单来说就是如果能够控制并修改一个对象的原型，就可以影响到所有和这个对象同一个原型的对象。</p>
+<h2 id="merge操作导致原型链污染">merge操作导致原型链污染</h2>
+<p>merge操作是最常见可能控制键名的操作，也最能被原型链攻击。</p>
+<ul>
+<li>简单例子：</li>
+</ul>
+<pre><code>function merge(target, source) {
+    for (let key in source) {
+        if (key in source &amp;&amp; key in target) {
+            merge(target[key], source[key])
+        } else {
+            target[key] = source[key]
+        }
+    }
+}
+
+let object1 = {}
+let object2 = JSON.parse('{&quot;a&quot;: 1, &quot;__proto__&quot;: {&quot;b&quot;: 2}}')
+merge(object1, object2)
+console.log(object1.a, object1.b)
+
+object3 = {}
+console.log(object3.b)
+</code></pre>
+<p>需要注意的点是：</p>
+<p>在JSON解析的情况下，<code>__proto__</code>会被认为是一个真正的“键名”，而不代表“原型”，所以在遍历object2的时候会存在这个键。</p>
+<p>最终输出的结果为：</p>
+<pre><code>1 2
+2
+</code></pre>
+<p>可见object3的b是从原型中获取到的，说明Object已经被污染了。</p>
+<p>在平时的挖洞过程中只需要在URL后面加上<code>__proto__[xxx]=xxx</code>参数一般就能够检测出网站是否存在这个漏洞了。比如说<code>https://test.com?__proto__[xxx]=yyy</code><br>
+如果说网站存在原型污染漏洞，那么在浏览器console中输入，document.xxx应该会返回值yyy。</p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://0xwi11.github.io/tag/amUzoEOq9/" class="tag">
+                    信息安全
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/http-smuggling/">
+                  <h3 class="post-title">
+                    HTTP Smuggling笔记
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

